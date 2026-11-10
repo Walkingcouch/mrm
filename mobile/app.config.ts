@@ -5,7 +5,7 @@ import type { ExpoConfig } from 'expo/config';
 //   IOS_BUNDLE_ID   – read from App Store Connect for app id6450782901
 //   ANDROID_PACKAGE – verify in Play Console (public listing shows io.appbuild.mcarthur)
 // Local development builds fall back to clearly non-store identifiers.
-const APP_ENV = process.env.APP_ENV ?? 'development'; // development | staging | production
+const APP_ENV = process.env.APP_ENV ?? 'development'; // development | preview | staging | production
 const isRelease = APP_ENV === 'production' || APP_ENV === 'staging';
 
 function required(name: string, devFallback: string): string {
@@ -16,8 +16,10 @@ function required(name: string, devFallback: string): string {
 }
 
 const config: ExpoConfig = {
-  name: APP_ENV === 'production' ? 'McArthur River Mine' : `MRM (${APP_ENV})`,
-  slug: 'mcarthur-river-mine',
+  name: APP_ENV === 'production' ? 'McArthur River Mine' : APP_ENV === 'preview' ? 'MRM Preview' : `MRM (${APP_ENV})`,
+  // Must match the Expo project at expo.dev/accounts/walkingcouch/projects/mrm-mcarthur-river-mine
+  owner: 'walkingcouch',
+  slug: 'mrm-mcarthur-river-mine',
   version: '2.0.0',
   orientation: 'portrait',
   scheme: 'mrm',
@@ -29,7 +31,8 @@ const config: ExpoConfig = {
     infoPlist: { ITSAppUsesNonExemptEncryption: false },
   },
   android: {
-    package: required('ANDROID_PACKAGE', 'dev.local.mrm'),
+    // Preview/test builds use a clearly non-store id so they install alongside the live app.
+    package: required('ANDROID_PACKAGE', APP_ENV === 'preview' ? 'dev.local.mrm.preview' : 'dev.local.mrm'),
     adaptiveIcon: {
       backgroundColor: '#FFFFFF',
       foregroundImage: './assets/android-icon-foreground.png',
@@ -49,6 +52,8 @@ const config: ExpoConfig = {
     supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
     supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
     pdfViewerUrl: process.env.EXPO_PUBLIC_PDF_VIEWER_URL,
+    // Expo project ID (expo.dev → project → General → ID). Set EAS_PROJECT_ID, or
+    // paste the value here once known; `eas init` can also fill it in.
     eas: process.env.EAS_PROJECT_ID ? { projectId: process.env.EAS_PROJECT_ID } : undefined,
   },
 };
