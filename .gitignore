@@ -1,0 +1,13 @@
+node_modules/
+.env
+.env.local
+.env.*.local
+supabase/functions/.env
+.expo/
+dist/
+web-build/
+ios/
+android/
+.next/
+*.tsbuildinfo
+.DS_Store
