@@ -1,6 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
-import { colors } from '@/lib/theme';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { colors, fonts } from '@/lib/theme';
 
 export function Centered({ children, style }: { children: React.ReactNode; style?: ViewStyle }) {
   return <View style={[styles.centered, style]}>{children}</View>;
@@ -34,25 +35,32 @@ export function Button({ label, onPress, kind = 'primary' }: { label: string; on
       onPress={onPress}
       style={({ pressed }) => [styles.button, kind === 'secondary' && styles.buttonSecondary, pressed && { opacity: 0.7 }]}
     >
-      <Text style={[styles.buttonText, kind === 'secondary' && { color: colors.accent }]}>{label}</Text>
+      <Text style={[styles.buttonText, kind === 'secondary' && { color: colors.text }]}>{label}</Text>
     </Pressable>
   );
 }
 
-export function Row({ title, subtitle, onPress, trailing, unseen }: {
-  title: string; subtitle?: string; onPress?: () => void; trailing?: string; unseen?: boolean;
+type IconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
+
+export function Row({ title, subtitle, onPress, trailing, unseen, icon }: {
+  title: string; subtitle?: string; onPress?: () => void; trailing?: string; unseen?: boolean; icon?: IconName;
 }) {
   return (
     <Pressable
       accessibilityRole={onPress ? 'button' : undefined}
       onPress={onPress}
       disabled={!onPress}
-      style={({ pressed }) => [styles.row, pressed && { backgroundColor: colors.surface }]}
+      style={({ pressed }) => [styles.row, pressed && { backgroundColor: '#E4E4E4' }]}
     >
-      {unseen !== undefined ? <View style={[styles.dot, !unseen && { backgroundColor: 'transparent' }]} accessibilityLabel={unseen ? 'Not yet opened' : undefined} /> : null}
+      {icon ? (
+        <View style={styles.rowIcon}>
+          <MaterialCommunityIcons name={icon} size={30} color={colors.teal} />
+          {unseen ? <View style={styles.dot} accessibilityLabel="Not yet opened" /> : null}
+        </View>
+      ) : null}
       <View style={{ flex: 1 }}>
         <Text style={styles.rowTitle}>{title}</Text>
-        {subtitle ? <Text style={styles.rowSubtitle} numberOfLines={2}>{subtitle}</Text> : null}
+        {subtitle ? <Text style={styles.rowSubtitle} numberOfLines={3}>{subtitle}</Text> : null}
       </View>
       {trailing ? <Text style={styles.trailing}>{trailing}</Text> : null}
     </Pressable>
@@ -61,16 +69,17 @@ export function Row({ title, subtitle, onPress, trailing, unseen }: {
 
 export const styles = StyleSheet.create({
   centered: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 12, backgroundColor: colors.background },
-  muted: { color: colors.muted, fontSize: 15 },
-  title: { color: colors.text, fontSize: 18, fontWeight: '600', textAlign: 'center' },
-  body: { color: colors.muted, fontSize: 15, textAlign: 'center' },
-  button: { backgroundColor: colors.accent, paddingVertical: 12, paddingHorizontal: 20, borderRadius: 8, minHeight: 44, justifyContent: 'center' },
-  buttonSecondary: { backgroundColor: 'transparent', borderWidth: 1, borderColor: colors.accent },
-  buttonText: { color: '#fff', fontSize: 16, fontWeight: '600', textAlign: 'center' },
-  row: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 16, minHeight: 56,
-         borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.divider, backgroundColor: colors.background, gap: 12 },
-  rowTitle: { color: colors.text, fontSize: 16 },
-  rowSubtitle: { color: colors.muted, fontSize: 14, marginTop: 2 },
-  trailing: { color: colors.accent, fontSize: 18 },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.accent },
+  muted: { color: colors.muted, fontSize: 15, fontFamily: fonts.regular },
+  title: { color: colors.text, fontSize: 18, fontFamily: fonts.semibold, textAlign: 'center' },
+  body: { color: colors.muted, fontSize: 15, fontFamily: fonts.regular, textAlign: 'center' },
+  button: { backgroundColor: colors.background, borderWidth: 1, borderColor: colors.text, paddingVertical: 12, paddingHorizontal: 20, borderRadius: 6, minHeight: 48, justifyContent: 'center', alignSelf: 'stretch' },
+  buttonSecondary: { backgroundColor: colors.background, borderColor: colors.text },
+  buttonText: { color: colors.text, fontSize: 17, fontFamily: fonts.regular, textAlign: 'center' },
+  row: { flexDirection: 'row', alignItems: 'center', paddingVertical: 14, paddingLeft: 8, paddingRight: 16, minHeight: 56,
+         borderBottomWidth: 1, borderBottomColor: colors.rowDivider, backgroundColor: colors.row, gap: 12 },
+  rowIcon: { width: 34, alignItems: 'center' },
+  rowTitle: { color: colors.text, fontSize: 19, fontFamily: fonts.regular },
+  rowSubtitle: { color: colors.muted, fontSize: 14, fontFamily: fonts.regular, marginTop: 2 },
+  trailing: { color: colors.muted, fontSize: 18 },
+  dot: { position: 'absolute', top: -2, right: -2, width: 10, height: 10, borderRadius: 5, backgroundColor: colors.danger, borderWidth: 1.5, borderColor: colors.row },
 });

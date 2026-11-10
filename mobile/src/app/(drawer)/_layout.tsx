@@ -1,15 +1,18 @@
 import React from 'react';
-import { Text, StyleSheet, Pressable, View } from 'react-native';
+import { Text, StyleSheet, Pressable, View, useWindowDimensions } from 'react-native';
 import { router, usePathname } from 'expo-router';
 import { Drawer, DrawerContentScrollView, type DrawerContentComponentProps } from 'expo-router/drawer';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useContent } from '@/lib/content-context';
-import { appTitle, colors } from '@/lib/theme';
+import { appTitle, colors, fonts, sectionIcons } from '@/lib/theme';
+import { headerStyle } from '@/components/Header';
 
+// Menu as in the current app: light grey panel, teal outline icon + teal label per item.
 function Menu(props: DrawerContentComponentProps) {
   const { sections } = useContent();
   const pathname = usePathname();
   return (
-    <DrawerContentScrollView {...props} contentContainerStyle={{ paddingTop: 8 }}>
+    <DrawerContentScrollView {...props} style={{ backgroundColor: colors.drawer }} contentContainerStyle={{ paddingTop: 4 }}>
       {sections.map((s) => {
         const href = s.key === 'home' ? '/' : `/section/${s.key}`;
         const active = pathname === href;
@@ -23,10 +26,12 @@ function Menu(props: DrawerContentComponentProps) {
               if (s.key === 'home') router.navigate('/');
               else router.navigate({ pathname: '/section/[key]', params: { key: s.key } });
             }}
-            style={({ pressed }) => [styles.item, active && styles.itemActive, pressed && { opacity: 0.7 }]}
+            style={({ pressed }) => [styles.item, active && styles.itemActive, pressed && { opacity: 0.6 }]}
           >
-            <View style={[styles.marker, active && { backgroundColor: colors.accent }]} />
-            <Text style={[styles.label, active && { color: colors.accent, fontWeight: '600' }]}>{s.label}</Text>
+            <View style={styles.icon}>
+              <MaterialCommunityIcons name={sectionIcons[s.key] ?? 'circle-outline'} size={28} color={colors.teal} />
+            </View>
+            <Text style={styles.label}>{s.label}</Text>
           </Pressable>
         );
       })}
@@ -36,14 +41,16 @@ function Menu(props: DrawerContentComponentProps) {
 
 export default function DrawerLayout() {
   const { sections } = useContent();
+  const { width } = useWindowDimensions();
+  const drawerWidth = Math.round(Math.min(360, Math.max(260, width * 0.6)));
   return (
     <Drawer
       drawerContent={(p) => <Menu {...p} />}
       screenOptions={{
-        headerStyle: { backgroundColor: colors.header },
-        headerTintColor: colors.headerText,
-        headerTitleAlign: 'center',
+        ...headerStyle,
         drawerType: 'front',
+        drawerStyle: { backgroundColor: colors.drawer, width: drawerWidth },
+        overlayColor: 'rgba(0,0,0,0.08)',
         sceneStyle: { backgroundColor: colors.background },
       }}
     >
@@ -60,8 +67,8 @@ export default function DrawerLayout() {
 }
 
 const styles = StyleSheet.create({
-  item: { flexDirection: 'row', alignItems: 'center', minHeight: 48, paddingVertical: 12, paddingRight: 16, gap: 12 },
-  itemActive: { backgroundColor: '#EEF7F6' },
-  marker: { width: 4, alignSelf: 'stretch', backgroundColor: 'transparent' },
-  label: { flex: 1, color: colors.text, fontSize: 16 },
+  item: { flexDirection: 'row', alignItems: 'center', minHeight: 56, paddingVertical: 10, paddingLeft: 8, paddingRight: 12, gap: 12 },
+  itemActive: { backgroundColor: colors.tealSoft },
+  icon: { width: 32, alignItems: 'center' },
+  label: { flex: 1, color: colors.tealText, fontSize: 19, fontFamily: fonts.regular },
 });

@@ -5,7 +5,7 @@ import { Linking, View } from 'react-native';
 import { WebView, type WebViewProps } from 'react-native-webview';
 import * as WebBrowser from 'expo-web-browser';
 import { Loading, Notice } from './ui';
-import { colors } from '@/lib/theme';
+import { colors, fonts } from '@/lib/theme';
 
 export function InAppWeb({ url, html, baseUrl, fallbackUrl, ...rest }: {
   url?: string; html?: string; baseUrl?: string; fallbackUrl?: string;

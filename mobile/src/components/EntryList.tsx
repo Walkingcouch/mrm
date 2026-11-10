@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { entriesFor, type ContentSnapshot, type Entry, type Section } from '@/lib/api';
 import { useContent } from '@/lib/content-context';
 import { Notice, Row } from './ui';
-import { colors } from '@/lib/theme';
+import { colors, sectionIcons } from '@/lib/theme';
 
 function notYet() {
   Alert.alert('Not yet available', 'This item has not been set up yet.');
@@ -42,6 +42,7 @@ export function EntryList({ section, snapshot }: { section: Section; snapshot: C
   const entries = entriesFor(snapshot, section);
   return (
     <FlatList
+      style={{ backgroundColor: colors.background }}
       data={entries}
       keyExtractor={(e) => e.id}
       contentContainerStyle={entries.length ? undefined : { flexGrow: 1 }}
@@ -51,7 +52,7 @@ export function EntryList({ section, snapshot }: { section: Section; snapshot: C
         <Row
           title={item.is_demo ? `[DEMO] ${item.label}` : item.label}
           subtitle={hint(item)}
-          trailing="›"
+          icon={sectionIcons[section.key] ?? 'file-outline'}
           onPress={() => openEntry(item)}
         />
       )}

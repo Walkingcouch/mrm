@@ -8,7 +8,7 @@ import Constants from 'expo-constants';
 import { loadPublicConfig, loadSources, type Source } from '@/lib/api';
 import { getSubscriptions, setSubscriptions } from '@/lib/installation';
 import { getPushState, setUpPush, type PushState } from '@/lib/notifications';
-import { colors } from '@/lib/theme';
+import { colors, fonts } from '@/lib/theme';
 import { Button } from './ui';
 
 const STATE_TEXT: Record<PushState, string> = {
@@ -82,9 +82,9 @@ export function SettingsSection() {
 
 const styles = StyleSheet.create({
   page: { padding: 16, gap: 10, paddingBottom: 40 },
-  h: { fontSize: 18, fontWeight: '600', color: colors.text, marginTop: 16 },
-  p: { fontSize: 16, color: colors.text },
-  small: { fontSize: 14, color: colors.muted },
+  h: { fontSize: 18, fontFamily: fonts.semibold, color: colors.text, marginTop: 16 },
+  p: { fontSize: 16, fontFamily: fonts.regular, color: colors.text },
+  small: { fontSize: 14, fontFamily: fonts.regular, color: colors.muted },
   switchRow: { flexDirection: 'row', alignItems: 'center', minHeight: 48, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.divider, gap: 12 },
-  switchLabel: { flex: 1, fontSize: 16, color: colors.text },
+  switchLabel: { flex: 1, fontSize: 16, fontFamily: fonts.regular, color: colors.text },
 });

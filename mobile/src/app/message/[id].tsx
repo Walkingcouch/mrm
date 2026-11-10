@@ -7,7 +7,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { loadMessage, type Attachment, type MessageRow } from '@/lib/api';
 import { seenMessages } from '@/lib/seen';
 import { formatDarwin } from '@/lib/time';
-import { colors } from '@/lib/theme';
+import { colors, fonts } from '@/lib/theme';
 import { Loading, Notice, Row } from '@/components/ui';
 
 export default function MessageScreen() {
@@ -53,8 +53,8 @@ export default function MessageScreen() {
 
 const styles = StyleSheet.create({
   page: { padding: 16, paddingBottom: 40 },
-  source: { fontSize: 18, fontWeight: '600', color: colors.text },
-  time: { fontSize: 14, color: colors.muted, marginTop: 2, marginBottom: 12 },
-  body: { fontSize: 16, lineHeight: 24, color: colors.text },
-  attHead: { fontSize: 14, fontWeight: '600', color: colors.muted, marginBottom: 4, textTransform: 'uppercase' },
+  source: { fontSize: 18, fontFamily: fonts.semibold, color: colors.text },
+  time: { fontSize: 14, fontFamily: fonts.regular, color: colors.muted, marginTop: 2, marginBottom: 12 },
+  body: { fontSize: 16, fontFamily: fonts.regular, lineHeight: 24, color: colors.text },
+  attHead: { fontSize: 14, fontFamily: fonts.semibold, color: colors.muted, marginBottom: 4, textTransform: 'uppercase' },
 });

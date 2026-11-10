@@ -3,7 +3,7 @@ import { ScrollView, Text } from 'react-native';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { useContent } from '@/lib/content-context';
 import { Loading, Notice } from '@/components/ui';
-import { colors } from '@/lib/theme';
+import { colors, fonts } from '@/lib/theme';
 
 // Information text is rendered as plain text (never HTML), so nothing an
 // administrator types can inject markup or scripts.
@@ -17,7 +17,7 @@ export default function InfoScreen() {
   if (!entry?.body) return <Notice title="Not found" body="It may have been removed." />;
   return (
     <ScrollView contentContainerStyle={{ padding: 16 }} style={{ backgroundColor: colors.background }}>
-      <Text selectable style={{ fontSize: 16, lineHeight: 24, color: colors.text }} dataDetectorType="all">{entry.body}</Text>
+      <Text selectable style={{ fontSize: 16, fontFamily: fonts.regular, lineHeight: 24, color: colors.text }} dataDetectorType="all">{entry.body}</Text>
     </ScrollView>
   );
 }

@@ -43,8 +43,9 @@ export function MessagesSection() {
       ListEmptyComponent={<Notice title="No messages" />}
       renderItem={({ item }) => (
         <Row
-          title={`${item.source_label} · ${formatDarwin(item.created_at)}`}
-          subtitle={item.body}
+          title={item.source_label}
+          subtitle={`${formatDarwin(item.created_at)}\n${item.body}`}
+          icon="email-outline"
           unseen={!seen.has(item.id)}
           onPress={() => router.push({ pathname: '/message/[id]', params: { id: item.id } })}
         />
