@@ -52,9 +52,8 @@ const config: ExpoConfig = {
     supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
     supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
     pdfViewerUrl: process.env.EXPO_PUBLIC_PDF_VIEWER_URL,
-    // Expo project ID (expo.dev → project → General → ID). Set EAS_PROJECT_ID, or
-    // paste the value here once known; `eas init` can also fill it in.
-    eas: process.env.EAS_PROJECT_ID ? { projectId: process.env.EAS_PROJECT_ID } : undefined,
+    // Expo project ID for expo.dev/accounts/walkingcouch/projects/mrm-mcarthur-river-mine
+    eas: { projectId: process.env.EAS_PROJECT_ID ?? 'e2d3ea56-113d-458a-8ef7-68e0619cb16d' },
   },
 };
 
