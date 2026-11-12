@@ -6,9 +6,12 @@ import type { Section } from '@/lib/api';
 import { Notice } from './ui';
 import { InAppWeb } from './InAppWeb';
 
+// The WillyWeather widget is set to 400px wide (its minimum). A 424px-wide page
+// (400 + padding) lets phones narrower than that shrink it to fit instead of
+// scrolling sideways; wider phones show it at full size.
 function widgetPage(widgetHtml: string): string {
-  return `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1">
-<style>html,body{margin:0;padding:12px;background:#fff;font-family:-apple-system,Roboto,sans-serif}</style></head>
+  return `<!doctype html><html><head><meta name="viewport" content="width=424">
+<style>html,body{margin:0;padding:12px;background:#fff;font-family:-apple-system,Roboto,sans-serif}iframe{max-width:100%}</style></head>
 <body>${widgetHtml}</body></html>`;
 }
 
