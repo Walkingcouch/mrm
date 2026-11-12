@@ -31,7 +31,7 @@ export interface Entry {
   file_path: string | null; file_updated_at: string | null; created_at: string; is_demo: boolean;
   icon: string | null; // Material Community icon name set on the admin website (null = section icon)
 }
-export interface MessageRow { id: string; source_label: string; scope: string; body: string; created_at: string }
+export interface MessageRow { id: string; source_label: string; scope: string; body: string; created_at: string; link_node_id?: string | null }
 export interface Attachment { id: string; message_id: string; file_path: string; file_name: string; mime_type: string; position: number }
 export interface Source { id: string; label: string; subscribable: boolean; is_active: boolean; position: number }
 
@@ -103,7 +103,7 @@ export async function loadMessages(): Promise<MessageRow[]> {
 export async function loadMessage(id: string): Promise<{ message: MessageRow; attachments: Attachment[] } | null> {
   if (SAMPLE_MODE) return sampleMessage(id);
   const [m, a] = await Promise.all([
-    supabase.from('messages').select('id,source_label,scope,body,created_at').eq('id', id).maybeSingle(),
+    supabase.from('messages').select('id,source_label,scope,body,created_at,link_node_id').eq('id', id).maybeSingle(),
     supabase.from('message_attachments').select('id,message_id,file_path,file_name,mime_type,position').eq('message_id', id).order('position'),
   ]);
   if (m.error) throw m.error;

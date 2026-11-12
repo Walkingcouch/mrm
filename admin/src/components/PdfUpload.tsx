@@ -25,9 +25,9 @@ export function PdfUpload({ mode, nodeId, sectionId, buttonLabel, allowLabel, no
   const [sourceId, setSourceId] = useState(notify?.sources[0]?.id ?? '');
   const defaultText = () => {
     const name = (mode === 'replace' ? notify?.itemLabel : label.trim()) || '';
-    return name
-      ? `${name} has been updated. Open ${notify?.placeLabel} → ${name} to view it.`
-      : `A new document has been added to ${notify?.placeLabel}.`;
+    // The message gets an "Open" button in the app, so no directions needed.
+    if (mode === 'replace') return `${name || 'A document'} has been updated.`;
+    return name ? `${name} has been added to ${notify?.placeLabel}.` : `A new document has been added to ${notify?.placeLabel}.`;
   };
   const [text, setText] = useState('');
   const source = notify?.sources.find((x) => x.id === sourceId);
@@ -48,7 +48,8 @@ export function PdfUpload({ mode, nodeId, sectionId, buttonLabel, allowLabel, no
       const done = mode === 'replace' ? 'Replaced. The apps now show the new PDF.' : 'Added. It now appears in the apps.';
       if (canNotify && notifyOn && sourceId) {
         setBusy('Sending notification…');
-        const n = await sendMessage({ requestId: crypto.randomUUID(), sourceId, scope: 'department', body: (text || defaultText()).trim(), attachments: [] });
+        const n = await sendMessage({ requestId: crypto.randomUUID(), sourceId, scope: 'department', body: (text || defaultText()).trim(), attachments: [],
+          linkNodeId: mode === 'replace' ? nodeId : t.data.entryId });
         setMsg(n.ok
           ? { ok: true, text: `${done} ${n.data?.pushed ? `Notification sent from ${source?.label}.` : `Message posted in Employee Messages from ${source?.label} (this team can't send push notifications).`}` }
           : { ok: false, text: `${done} But the notification couldn't be sent: ${n.error}` });
@@ -96,8 +97,8 @@ export function PdfUpload({ mode, nodeId, sectionId, buttonLabel, allowLabel, no
                 <textarea id={`txt-${mode}-${nodeId}`} value={text} maxLength={500} rows={2} onChange={(e) => setText(e.target.value)} /></div>
               <p className="muted" style={{ margin: 0, fontSize: '.85rem' }}>
                 {source?.push
-                  ? 'Sent once the PDF is live: phones that follow this team get a notification, and it appears in Employee Messages.'
-                  : 'This team can post in Employee Messages but not send push notifications.'}
+                  ? 'Sent once the PDF is live: phones that follow this team get a notification, and it appears in Employee Messages with a button that opens the PDF.'
+                  : 'This team can post in Employee Messages (with a button that opens the PDF) but not send push notifications.'}
               </p>
             </div>
           ) : null}

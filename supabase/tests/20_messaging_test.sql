@@ -77,6 +77,20 @@ select test.check((select abs(extract(epoch from (push_deadline - created_at)) -
 select test.check(not exists (select 1 from information_schema.columns where table_name = 'messages'
   and column_name in ('title','category','expires_at','scheduled_at','status_approval')), 'No title/category/schedule/expiry/approval fields exist (K)');
 
+-- A message can link to a menu item; the app can read the link; bad links are refused.
+select test.as_admin(:'super');
+select admin_create_entry((select id from content_nodes where key = 'village'), 'url', 'Linked item', 'https://example.test/l') as linked \gset
+select test.as_admin(:'kitchen');
+select message_id as m_link from admin_send_message(gen_random_uuid(), :'src_kitchen', 'department', 'Menu updated', '[]'::jsonb, :'linked') \gset
+select test.check((select link_node_id from messages where id = :'m_link') = :'linked'::uuid, 'Message stores its linked item');
+select test.expect_error(format($$select * from admin_send_message(gen_random_uuid(), %L, 'department', 'x', '[]'::jsonb, gen_random_uuid())$$, :'src_kitchen'),
+  'A link to a missing item is refused', '22023');
+select test.as_anon();
+select test.check((select link_node_id from messages where id = :'m_link') = :'linked'::uuid, 'App can read the linked item');
+select test.as_admin(:'super');
+select admin_delete_entry(:'linked');
+select test.check((select link_node_id from messages where id = :'m_link') is null, 'Deleting the item clears the link');
+
 -- The admin log shows who sent the message.
 select test.check((select sent_by_email from admin_list_messages(200) where id = :'m1') = 'kitchen@example.test',
   'Message log shows the sender');

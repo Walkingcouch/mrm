@@ -222,8 +222,11 @@ export async function setWeatherWidget(sectionId: string, html: string): Promise
 export async function sendMessage(input: {
   requestId: string; sourceId: string; scope: 'department' | 'global_general' | 'global_emergency';
   body: string; attachments: { path: string; name: string; mime: string; size: number }[];
+  /** Menu item the message is about; the app shows an "Open …" button for it. */
+  linkNodeId?: string;
 }): Promise<Result<{ pushed: boolean }>> {
   if (!isUuid(input.requestId) || !isUuid(input.sourceId)) return { ok: false, error: 'Invalid request.' };
+  if (input.linkNodeId && !isUuid(input.linkNodeId)) return { ok: false, error: 'Invalid request.' };
   if (!input.body.trim()) return { ok: false, error: 'Write a message first.' };
   for (const a of input.attachments) {
     const real = await sniff('messages', a.path);
@@ -233,6 +236,7 @@ export async function sendMessage(input: {
   const { data, error } = await db.rpc('admin_send_message', {
     p_request_id: input.requestId, p_source: input.sourceId, p_scope: input.scope,
     p_body: input.body, p_attachments: input.attachments,
+    ...(input.linkNodeId ? { p_link_node: input.linkNodeId } : {}),
   });
   if (error) return { ok: false, error: friendly(error) };
   const row = (Array.isArray(data) ? data[0] : data) as { message_id: string; created: boolean; push_requested: boolean };
