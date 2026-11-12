@@ -34,9 +34,25 @@ export async function signOut() {
 
 export async function requestPasswordReset(_prev: Result, form: FormData): Promise<Result> {
   const db = await userClient();
-  await db.auth.resetPasswordForEmail(String(form.get('email') ?? '').trim(), { redirectTo: `${SITE_URL}/auth/confirm` });
-  // Same response whether or not the address exists.
+  const { error } = await db.auth.resetPasswordForEmail(String(form.get('email') ?? '').trim(), { redirectTo: `${SITE_URL}/auth/confirm` });
+  // Email sending is limited per hour for the whole project, so saying so
+  // reveals nothing about whether this address has an account.
+  if (error && (error.status === 429 || error.code === 'over_email_send_rate_limit')) {
+    return { ok: false, error: 'Too many emails have been sent in the last hour. Please try again later.' };
+  }
+  // Otherwise the same response whether or not the address exists.
   return { ok: true };
+}
+
+/** Use the one-time token from an invite / reset email (button press on /auth/continue). */
+export async function confirmEmailLink(_prev: Result, form: FormData): Promise<Result> {
+  const token_hash = String(form.get('token_hash') ?? '');
+  const type = String(form.get('type') ?? '');
+  if (!token_hash || (type !== 'invite' && type !== 'recovery')) return { ok: false, error: 'This link is incomplete. Request a new one.' };
+  const db = await userClient();
+  const { error } = await db.auth.verifyOtp({ token_hash, type });
+  if (error) return { ok: false, error: 'This link has expired or has already been used. Use "Request a new link" below.' };
+  redirect('/set-password');
 }
 
 export async function setPassword(_prev: Result, form: FormData): Promise<Result> {
