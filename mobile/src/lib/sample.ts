@@ -4,9 +4,7 @@
 //
 // Links and documents are the live app's own URLs (MRM URL List supplied by the
 // owner, 12 Nov 2026). Phone numbers are from screenshots of the live app.
-// Sub-folders in the live app (Benefits & Rewards, MRM Enterprise Agreement) are
-// shown as flat items in HR & Payroll, because the new app has one level of
-// items per section.
+// HR & Payroll matches the live app: same order, two folders, live labels and icons.
 import type { Attachment, Entry, EntryKind, MessageRow, Section, SectionType } from './api';
 
 const FILES = 'https://storage.googleapis.com/gs.appbuild.io/apps/mcarthur/attachments/';
@@ -33,7 +31,9 @@ export const sampleSections: Section[] = SECTIONS.map(([key, label, section_type
   sort_mode: key === 'memorandum' ? 'newest_first' : 'manual', url: url ?? null, widget_html: null,
 }));
 
-type Item = [string, EntryKind, string | null, string?];
+type Item = [string, EntryKind, string | null, string?, string?, Item[]?]; // label, kind, value, created, icon, folder items
+const withIcon = (icon: string) => (it: Item): Item => [it[0], it[1], it[2], it[3], icon, it[5]];
+const folder = (label: string, icon: string, items: Item[]): Item => [label, 'folder', null, undefined, icon, items];
 const pdf = (label: string, file: string, created?: string): Item => [label, 'pdf', FILES + file, created];
 const link = (label: string, url: string | null): Item => [label, 'url', url];
 const phone = (label: string, number: string): Item => [label, 'phone', number];
@@ -57,28 +57,30 @@ const ITEMS: Record<string, Item[]> = {
     pdf('Well for Work Declaration', 'Well_For_Work_Declaration.pdf'),
   ],
   hr: [
-    // Benefits & Rewards (a sub-folder in the live app)
-    pdf('MRM Employee travel with AirNorth', 'Airnorth_MRM_Employee_Travel_-_App_24-07-23.pdf'),
-    pdf('Bupa Corp', 'Bupa_Glencore_June_July.pdf'),
-    pdf('Corporate Travel Offer', 'Corporate-Leisure_QR-Code_EN.pdf'),
-    pdf('Medibank Private 2', 'Medibank_Private___Glencore_Group.pdf'),
-    pdf('Salary Packaging – RemServ', 'Remote_Area_Flights.pdf'),
-    pdf('Glencore Rewards', 'Glencore__Reward_Gateway_Welcome_Poster_2_29092021.pdf'),
-    pdf('Advance Learning Platform', 'Advance_Learning_Platform.pdf'),
-    pdf('Employee Rewards & Benefits', 'MRM_Employee_Benefits_-_Rewards.pdf'),
-    // HR
-    pdf('MRM & HR Team Contacts', 'MRM_HR_Team_Contact_List.pdf'),
-    pdf('Career Opportunities', 'MRM_Career_opportunities_-_IOS_ratio.pdf'),
-    // MRM Enterprise Agreement (a sub-folder in the live app)
-    pdf('MRM Enterprise Agreement 2025', 'McArthur_River_Mining_Pty_Ltd_Enterprise_Agreement_2025.pdf'),
-    pdf('MRM EA 2025 Classifications & Pay Rates', 'MRM_EA_2025_Classifications_and_pay_rates.pdf'),
-    pdf('MRM EA 2026 Classifications & Pay Rates', 'MRM_EA_2026_Classifications_and_Pay_Rates.pdf'),
-    // Payroll
-    link('Leave Request Update', 'https://mcarthurrivermine.wufoo.com/forms/mjeybgg139u8ra/'),
-    link('Overtime Request Update', 'https://www.surveymonkey.com/r/MRM_Overtime_Request'),
-    pdf('Payroll Schedule 2026–27', 'Payroll_Schedule_26-27.pdf'),
-    pdf('Payslip Guide', 'Payslip_Guide_2025b.pdf'),
-    link('NT Residency Payment – EA Employees', null), // blank in the live app
+    folder('Benefits & Rewards', 'handshake-outline', [
+      pdf('MRM Employee travel with Airnorth', 'Airnorth_MRM_Employee_Travel_-_App_24-07-23.pdf'),
+      pdf('Bupa Corporate Health Insurance Phone Consults', 'Bupa_Glencore_June_July.pdf'),
+      pdf('Corporate Travel Offer - Air Canada', 'Corporate-Leisure_QR-Code_EN.pdf'),
+      pdf('Medibank Private 2', 'Medibank_Private___Glencore_Group.pdf'),
+      pdf('Salary Packaging - RemServ', 'Remote_Area_Flights.pdf'),
+      pdf('Glencore Rewards', 'Glencore__Reward_Gateway_Welcome_Poster_2_29092021.pdf'),
+      pdf('Advance learning Platform', 'Advance_Learning_Platform.pdf'),
+      pdf('Employee Rewards and Benefits', 'MRM_Employee_Benefits_-_Rewards.pdf'),
+    ].map(withIcon('handshake-outline'))),
+    withIcon('account-group-outline')(pdf('MRM HR Team Contact List', 'MRM_HR_Team_Contact_List.pdf')),
+    withIcon('briefcase-outline')(pdf('Career Opportunities', 'MRM_Career_opportunities_-_IOS_ratio.pdf')),
+    folder('MRM Enterprise Agreement', 'handshake-outline', [
+      ['McArthur River Mining Pty Ltd Enterprise Agreement 2019', 'pdf', null] as Item, // not in the URL List yet
+      pdf('McArthur River Mining Pty Ltd Enterprise Agreement 2025', 'McArthur_River_Mining_Pty_Ltd_Enterprise_Agreement_2025.pdf'),
+      pdf('MRM EA 2025 Classifications and Pay Rates', 'MRM_EA_2025_Classifications_and_pay_rates.pdf'),
+      pdf('MRM EA 2026 Classifications and Pay Rates', 'MRM_EA_2026_Classifications_and_Pay_Rates.pdf'),
+    ].map(withIcon('handshake-outline'))),
+    withIcon('clipboard-text-outline')(link('Leave Request Update', 'https://mcarthurrivermine.wufoo.com/forms/mjeybgg139u8ra/')),
+    withIcon('clipboard-text-outline')(link('Overtime Request Update', 'https://www.surveymonkey.com/r/MRM_Overtime_Request')),
+    withIcon('calendar-clock-outline')(['Payroll Schedule - 2025/26', 'pdf', null] as Item), // not in the URL List yet
+    withIcon('calendar-clock-outline')(pdf('Payroll Schedule - 2026/27', 'Payroll_Schedule_26-27.pdf')),
+    withIcon('calendar-clock-outline')(pdf('Payslip Guide', 'Payslip_Guide_2025b.pdf')),
+    withIcon('clipboard-text-outline')(link('Northern Territory Residency Payment - EA Employees', null)), // blank in the live app
   ],
   memorandum: [
     pdf('25th May 2026', '20260525_Memorandum.pdf', '2026-05-25T00:00:00Z'),
@@ -100,14 +102,21 @@ const ITEMS: Record<string, Item[]> = {
   ],
 };
 
-export const sampleEntries: Entry[] = Object.entries(ITEMS).flatMap(([key, items]) =>
-  items.map(([label, kind, value, created], i) => ({
-    id: `sample-${key}-${i + 1}`, parent_id: `sample-${key}`, kind, label, position: (i + 1) * 10,
-    url: kind === 'url' ? value : null,
-    phone: kind === 'phone' ? value : null,
-    file_path: kind === 'pdf' ? value : null,
-    body: null, file_updated_at: kind === 'pdf' ? T : null, created_at: created ?? T, is_demo: false,
-  })));
+function build(parent: string, items: Item[]): Entry[] {
+  return items.flatMap(([label, kind, value, created, icon, children], i) => {
+    const id = `${parent}-${i + 1}`;
+    const self: Entry = {
+      id, parent_id: parent, kind, label, position: (i + 1) * 10,
+      url: kind === 'url' ? value : null,
+      phone: kind === 'phone' ? value : null,
+      file_path: kind === 'pdf' ? value : null,
+      body: null, file_updated_at: kind === 'pdf' && value ? T : null, created_at: created ?? T, is_demo: false, icon: icon ?? null,
+    };
+    return [self, ...(children ? build(id, children) : [])];
+  });
+}
+
+export const sampleEntries: Entry[] = Object.entries(ITEMS).flatMap(([key, items]) => build(`sample-${key}`, items));
 
 // Employee Messages: the two messages listed for the live app, each with its PDF.
 const MESSAGES: (MessageRow & { file: string; name: string })[] = [

@@ -18,7 +18,7 @@ export const supabase = createClient(SUPABASE_URL || 'https://not-configured.inv
 });
 
 export type SectionType = 'home' | 'list' | 'web' | 'weather' | 'messages' | 'settings';
-export type EntryKind = 'pdf' | 'url' | 'info' | 'phone' | 'map';
+export type EntryKind = 'pdf' | 'url' | 'info' | 'phone' | 'map' | 'folder';
 
 export interface Section {
   id: string; key: string; label: string; position: number;
@@ -29,6 +29,7 @@ export interface Entry {
   id: string; parent_id: string; kind: EntryKind; label: string; position: number;
   url: string | null; body: string | null; phone: string | null;
   file_path: string | null; file_updated_at: string | null; created_at: string; is_demo: boolean;
+  icon: string | null; // Material Community icon name set on the admin website (null = section icon)
 }
 export interface MessageRow { id: string; source_label: string; scope: string; body: string; created_at: string }
 export interface Attachment { id: string; message_id: string; file_path: string; file_name: string; mime_type: string; position: number }
@@ -53,7 +54,7 @@ export async function loadContent(): Promise<ContentSnapshot> {
   try {
     const { data, error } = await supabase
       .from('content_nodes')
-      .select('id,parent_id,key,kind,section_type,sort_mode,label,position,url,body,phone,widget_html,file_path,file_updated_at,created_at,is_demo')
+      .select('id,parent_id,key,kind,section_type,sort_mode,label,position,url,body,phone,widget_html,file_path,file_updated_at,created_at,is_demo,icon')
       .order('position');
     if (error) throw error;
     const rows = data ?? [];
@@ -71,9 +72,10 @@ export async function loadContent(): Promise<ContentSnapshot> {
   }
 }
 
-export function entriesFor(snap: ContentSnapshot, section: Section): Entry[] {
-  const list = snap.entries.filter((e) => e.parent_id === section.id);
-  return section.sort_mode === 'newest_first'
+/** Items directly inside a section or a folder. Folders follow their section's sort order. */
+export function entriesFor(snap: ContentSnapshot, parent: { id: string; sort_mode: Section['sort_mode'] }): Entry[] {
+  const list = snap.entries.filter((e) => e.parent_id === parent.id);
+  return parent.sort_mode === 'newest_first'
     ? list.sort((a, b) => (b.created_at > a.created_at ? 1 : -1))
     : list.sort((a, b) => a.position - b.position);
 }

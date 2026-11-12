@@ -130,7 +130,7 @@ export async function finalizePdf(input: {
 
 // ---------------------------------------------------------------- content entries
 
-type Kind = 'url' | 'info' | 'phone' | 'map';
+type Kind = 'url' | 'info' | 'phone' | 'map' | 'folder';
 
 export async function createEntry(sectionId: string, kind: Kind, label: string, value: string): Promise<Result> {
   const db = await userClient();
@@ -153,6 +153,14 @@ export async function updateEntry(sectionId: string, id: string, label: string |
     p_body: kind === 'info' ? value : null,
     p_phone: kind === 'phone' ? value : null,
   });
+  if (error) return { ok: false, error: friendly(error) };
+  revalidatePath(`/content/${sectionId}`);
+  return { ok: true };
+}
+
+export async function setEntryIcon(sectionId: string, id: string, icon: string | null): Promise<Result> {
+  const db = await userClient();
+  const { error } = await db.rpc('admin_set_entry_icon', { p_id: id, p_icon: icon });
   if (error) return { ok: false, error: friendly(error) };
   revalidatePath(`/content/${sectionId}`);
   return { ok: true };

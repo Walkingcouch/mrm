@@ -60,6 +60,7 @@ export default function RootLayout() {
             <Stack.Screen name="web" options={{ title: '' }} />
             <Stack.Screen name="message/[id]" options={{ title: 'Message' }} />
             <Stack.Screen name="info/[id]" options={{ title: '' }} />
+            <Stack.Screen name="folder/[id]" options={{ title: '' }} />
           </Stack>
         </ContentProvider>
       </SafeAreaProvider>
