@@ -158,6 +158,16 @@ export async function updateEntry(sectionId: string, id: string, label: string |
   return { ok: true };
 }
 
+/** Move items into a folder, back to the section, or between folders. */
+export async function moveEntries(pageId: string, ids: string[], targetId: string): Promise<Result<number>> {
+  const db = await userClient();
+  const { data, error } = await db.rpc('admin_move_entries', { p_ids: ids, p_target: targetId });
+  if (error) return { ok: false, error: friendly(error) };
+  revalidatePath(`/content/${pageId}`);
+  revalidatePath(`/content/${targetId}`);
+  return { ok: true, data: (data as number) ?? 0 };
+}
+
 export async function setEntryIcon(sectionId: string, id: string, icon: string | null): Promise<Result> {
   const db = await userClient();
   const { error } = await db.rpc('admin_set_entry_icon', { p_id: id, p_icon: icon });

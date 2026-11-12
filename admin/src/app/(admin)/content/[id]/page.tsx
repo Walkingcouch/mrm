@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { requireMe, type Me } from '@/lib/me';
 import { canSeeWithin, loadNodes, sortEntries, type Node } from '@/lib/content';
 import { formatDarwin } from '@/lib/time';
-import { AddEntry, EntryList, type EntryVM } from '@/components/EntryEditor';
+import { AddEntry, EntryList, NewFolder, type EntryVM, type MoveTarget } from '@/components/EntryEditor';
 import { SectionLinkForm, WeatherWidgetForm } from '@/components/SectionLinkForm';
 
 function toVM(nodes: Node[], me: Me, e: Node): EntryVM {
@@ -28,13 +28,18 @@ export default async function SectionPage({ params }: { params: Promise<{ id: st
     const fp = me.content[node.id];
     const items = sortEntries(parent, nodes.filter((n) => n.parent_id === node.id)).filter((e) => me.content[e.id]?.access);
     if (!fp?.access && !items.length) notFound();
+    const targets: MoveTarget[] = [
+      { id: parent.id, label: `${parent.label} (main list)`, isFolder: false },
+      ...sortEntries(parent, nodes.filter((n) => n.parent_id === parent.id && n.kind === 'folder' && n.id !== node.id))
+        .map((f) => ({ id: f.id, label: f.label, isFolder: true })),
+    ];
     return (
       <>
         <p><Link href={`/content/${parent.id}`}>← {parent.label}</Link></p>
         <h1>{node.label}</h1>
         <p className="muted">A folder in {parent.label}. Shown in the app in this order.</p>
         <EntryList sectionId={node.id} entries={items.map((e) => toVM(nodes, me, e))} canReorder={!!fp?.edit && parent.sort_mode === 'manual'}
-          notify={{ sources: me.sources, placeLabel: `${parent.label} → ${node.label}` }} />
+          notify={{ sources: me.sources, placeLabel: `${parent.label} → ${node.label}` }} moveTargets={fp?.edit ? targets : []} />
         <AddEntry sectionId={node.id} canUpload={!!fp?.upload} canEdit={!!fp?.edit} inFolder
           notify={{ sources: me.sources, placeLabel: `${parent.label} → ${node.label}` }} />
       </>
@@ -78,6 +83,8 @@ export default async function SectionPage({ params }: { params: Promise<{ id: st
   }
 
   const vms: EntryVM[] = visibleEntries.map((e) => toVM(nodes, me, e));
+  const canFolders = !!sp?.edit && section.key !== 'memorandum';
+  const folderTargets: MoveTarget[] = visibleEntries.filter((e) => e.kind === 'folder').map((f) => ({ id: f.id, label: f.label, isFolder: true }));
 
   return (
     <>
@@ -85,8 +92,9 @@ export default async function SectionPage({ params }: { params: Promise<{ id: st
       {section.sort_mode === 'newest_first'
         ? <p className="muted">Issues are listed newest first in the app. Upload each new monthly issue as a new PDF; older issues stay until removed.</p>
         : <p className="muted">Shown in the app in this order.</p>}
+      {canFolders ? <div className="row" style={{ marginBottom: '.75rem' }}><NewFolder sectionId={section.id} /></div> : null}
       <EntryList sectionId={section.id} entries={vms} canReorder={!!sp?.edit && section.sort_mode === 'manual'}
-        notify={{ sources: me.sources, placeLabel: section.label }} />
+        notify={{ sources: me.sources, placeLabel: section.label }} moveTargets={canFolders ? folderTargets : []} />
       <AddEntry sectionId={section.id} canUpload={!!sp?.upload} canEdit={!!sp?.edit && section.key !== 'memorandum'} canAddFolder={section.key !== 'memorandum'}
         notify={{ sources: me.sources, placeLabel: section.label }} />
     </>

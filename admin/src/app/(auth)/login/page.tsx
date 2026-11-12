@@ -9,6 +9,9 @@ export default async function LoginPage() {
   return (
     <div className="auth-wrap">
       <div className="card auth-card">
+        {/* PLACEHOLDER until the authorised Glencore logo is supplied (same file as the phone app). */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="auth-logo" src="/brand/logo.png" alt="Glencore" />
         <h1>MRM App Admin</h1>
         <p className="muted">Sign in to manage the McArthur River Mine app.</p>
         <AuthForm action={signIn} submit="Sign in">

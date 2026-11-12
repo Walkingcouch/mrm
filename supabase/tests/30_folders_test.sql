@@ -60,6 +60,26 @@ select test.expect_error(format($$select admin_update_entry(%L,'Hacked')$$, :'in
 select test.expect_error(format($$select admin_create_entry(%L,'url','x','https://example.test')$$, :'folder'),
   'Kitchen cannot add to an HR folder', '42501');
 
+-- Moving items into and out of folders
+select test.as_admin(:'dev');
+select admin_create_entry(:'hrsec', 'url', 'Loose link', 'https://example.test/loose') as loose \gset
+select admin_create_entry(:'hrsec', 'url', 'Loose link 2', 'https://example.test/loose2') as loose2 \gset
+select test.check(admin_move_entries(array[:'loose', :'loose2']::uuid[], :'folder') = 2, 'Two items moved into a folder in one go');
+select test.check((select count(*) from content_nodes where parent_id = :'folder' and id in (:'loose', :'loose2')) = 2, 'Moved items are inside the folder');
+select test.check((select position from content_nodes where id = :'loose2') > (select position from content_nodes where id = :'loose'),
+  'Moved items keep their order, at the end of the folder');
+select test.check(admin_move_entries(array[:'loose']::uuid[], :'hrsec') = 1, 'Item moved back out to the section');
+select admin_create_entry(:'hrsec', 'folder', 'Second folder') as folder2 \gset
+select test.expect_error(format($$select admin_move_entries(array[%L]::uuid[], %L)$$, :'folder2', :'folder'),
+  'A folder cannot be moved inside another folder', '22023');
+select test.expect_error(format($$select admin_move_entries(array[%L]::uuid[], %L)$$, :'loose', :'village'),
+  'Items cannot be moved to a different section', '22023');
+select test.as_admin(:'kitchen');
+select test.expect_error(format($$select admin_move_entries(array[%L]::uuid[], %L)$$, :'loose', :'folder'),
+  'Kitchen cannot move HR items', '42501');
+select test.as_admin(:'hr');
+select test.check(admin_move_entries(array[:'loose']::uuid[], :'folder2') = 1, 'HR (section edit rights) moves items between its folders');
+
 -- The public app can read folders and icons
 select test.as_anon();
 select test.check((select count(*) from content_nodes where kind = 'folder') >= 1, 'App can read folders');

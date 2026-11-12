@@ -2,7 +2,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { createEntry, deleteEntry, reorderEntries, setEntryIcon, updateEntry } from '@/app/actions';
+import { createEntry, deleteEntry, moveEntries, reorderEntries, setEntryIcon, updateEntry } from '@/app/actions';
 import { Feedback } from './Forms';
 import { PdfUpload, type NotifyOptions } from './PdfUpload';
 import type { Result } from '@/lib/result';
@@ -46,8 +46,9 @@ function ValueField({ kind, value, onChange, id }: { kind: Kind; value: string; 
 }
 const valueLabel = (k: Kind) => (k === 'info' ? 'Text shown in the app' : k === 'phone' ? 'Phone number' : 'Link (https://…)');
 
-export function EntryCard({ entry, sectionId, canMove, onMove, notify }: {
+export function EntryCard({ entry, sectionId, canMove, onMove, notify, selectable, selected, onSelect }: {
   entry: EntryVM; sectionId: string; canMove: boolean; onMove?: (dir: -1 | 1) => void; notify?: NotifyOptions;
+  selectable?: boolean; selected?: boolean; onSelect?: (on: boolean) => void;
 }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
@@ -75,6 +76,10 @@ export function EntryCard({ entry, sectionId, canMove, onMove, notify }: {
   return (
     <div className="card">
       <div className="card-head">
+        {selectable ? (
+          <input type="checkbox" className="select-box" checked={!!selected} onChange={(e) => onSelect?.(e.target.checked)}
+            aria-label={`Select ${entry.label} to move`} />
+        ) : null}
         <h2 style={{ margin: 0 }}>{entry.label}</h2>
         <span className={`badge${configured ? '' : ' warn'}`}>
           {isFolder ? `Folder · ${entry.itemCount ?? 0} item${entry.itemCount === 1 ? '' : 's'}` : configured ? KIND_LABEL[entry.kind] : 'Not set up yet'}
@@ -133,14 +138,33 @@ export function EntryCard({ entry, sectionId, canMove, onMove, notify }: {
   );
 }
 
-export function EntryList({ sectionId, entries, canReorder, notify }: { sectionId: string; entries: EntryVM[]; canReorder: boolean; notify?: NotifyOptions }) {
+/** Where items on this page can be moved to (a folder, or the section's main list). */
+export interface MoveTarget { id: string; label: string; isFolder: boolean }
+
+export function EntryList({ sectionId, entries, canReorder, notify, moveTargets = [] }: {
+  sectionId: string; entries: EntryVM[]; canReorder: boolean; notify?: NotifyOptions; moveTargets?: MoveTarget[];
+}) {
   const router = useRouter();
   const [order, setOrder] = useState(entries.map((e) => e.id));
   const [result, setResult] = useState<Result | null>(null);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [target, setTarget] = useState('');
+  const [moving, startMove] = useTransition();
+  const canSelect = (e: EntryVM) => moveTargets.length > 0 && e.perms.edit;
+  // Folders can't go inside folders, so only offer the main list when a folder is selected.
+  const folderSelected = selected.some((id) => entries.find((e) => e.id === id)?.kind === 'folder');
+  const targets = moveTargets.filter((t) => !selected.includes(t.id) && !(folderSelected && t.isFolder));
+  const move = () => startMove(async () => {
+    const dest = targets.find((t) => t.id === target) ?? targets[0];
+    if (!dest) return;
+    const r = await moveEntries(sectionId, selected, dest.id);
+    setResult(r.ok ? { ok: true, data: undefined } : r);
+    if (r.ok) { setSelected([]); setTarget(''); router.refresh(); }
+  });
   const byId = new Map(entries.map((e) => [e.id, e]));
   const ids = order.filter((id) => byId.has(id)).concat(entries.map((e) => e.id).filter((id) => !order.includes(id)));
 
-  const move = async (id: string, dir: -1 | 1) => {
+  const moveBy = async (id: string, dir: -1 | 1) => {
     const i = ids.indexOf(id), j = i + dir;
     if (j < 0 || j >= ids.length) return;
     const next = ids.slice(); [next[i], next[j]] = [next[j], next[i]];
@@ -153,10 +177,30 @@ export function EntryList({ sectionId, entries, canReorder, notify }: { sectionI
   if (!ids.length) return <div className="card muted">Nothing here yet.</div>;
   return (
     <>
-      <Feedback result={result} />
-      {ids.map((id) => (
-        <EntryCard key={id} entry={byId.get(id)!} sectionId={sectionId} canMove={canReorder} onMove={(d) => move(id, d)} notify={notify} />
-      ))}
+      <Feedback result={result} okText="Moved." />
+      {moveTargets.length ? (
+        <p className="muted">Tick items, then choose where to move them.</p>
+      ) : null}
+      {ids.map((id) => {
+        const e = byId.get(id)!;
+        return (
+          <EntryCard key={id} entry={e} sectionId={sectionId} canMove={canReorder} onMove={(d) => moveBy(id, d)} notify={notify}
+            selectable={canSelect(e)} selected={selected.includes(id)}
+            onSelect={(on) => setSelected((cur) => (on ? [...cur, id] : cur.filter((x) => x !== id)))} />
+        );
+      })}
+      {selected.length ? (
+        <div className="move-bar" role="region" aria-label="Move selected items">
+          <strong>{selected.length} selected</strong>
+          <label htmlFor="move-target" className="sr-only">Move to</label>
+          <select id="move-target" value={target || targets[0]?.id || ''} onChange={(e) => setTarget(e.target.value)} disabled={!targets.length}>
+            {targets.length ? targets.map((t) => <option key={t.id} value={t.id}>{t.isFolder ? `📁 ${t.label}` : t.label}</option>)
+              : <option value="">No other place to move to</option>}
+          </select>
+          <button type="button" onClick={move} disabled={moving || !targets.length}>{moving ? 'Moving…' : 'Move'}</button>
+          <button type="button" className="secondary" onClick={() => setSelected([])} disabled={moving}>Cancel</button>
+        </div>
+      ) : null}
     </>
   );
 }
@@ -202,6 +246,34 @@ export function AddEntry({ sectionId, canUpload, canEdit, canAddFolder = false, 
           <button type="button" onClick={add} disabled={pending || !label.trim()}>Add</button>
         </details>
       ) : null}
+    </div>
+  );
+}
+
+/** "+ New folder": one field and one button, at the top of a section. */
+export function NewFolder({ sectionId }: { sectionId: string }) {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState('');
+  const [result, setResult] = useState<Result | null>(null);
+  const [pending, start] = useTransition();
+  if (!open) return <button type="button" className="secondary" onClick={() => { setOpen(true); setResult(null); }}>+ New folder</button>;
+  const create = () => start(async () => {
+    const r = await createEntry(sectionId, 'folder', name, '');
+    setResult(r);
+    if (r.ok) { setName(''); setOpen(false); router.refresh(); }
+  });
+  return (
+    <div className="card">
+      <div className="field"><label htmlFor="new-folder">Folder name (shown as a heading in the app)</label>
+        <input id="new-folder" type="text" value={name} maxLength={120} autoFocus placeholder="e.g. Benefits & Rewards"
+          onChange={(e) => setName(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && name.trim()) create(); }} /></div>
+      <Feedback result={result} />
+      <div className="row">
+        <button type="button" onClick={create} disabled={pending || !name.trim()}>Create folder</button>
+        <button type="button" className="secondary" onClick={() => setOpen(false)} disabled={pending}>Cancel</button>
+      </div>
+      <p className="muted" style={{ marginTop: '.5rem', marginBottom: 0 }}>Then tick the items that belong in it and use Move.</p>
     </div>
   );
 }
