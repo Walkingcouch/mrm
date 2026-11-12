@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createEntry, deleteEntry, reorderEntries, setEntryIcon, updateEntry } from '@/app/actions';
 import { Feedback } from './Forms';
-import { PdfUpload } from './PdfUpload';
+import { PdfUpload, type NotifyOptions } from './PdfUpload';
 import type { Result } from '@/lib/result';
 
 export type Kind = 'pdf' | 'url' | 'info' | 'phone' | 'map' | 'folder';
@@ -46,8 +46,8 @@ function ValueField({ kind, value, onChange, id }: { kind: Kind; value: string; 
 }
 const valueLabel = (k: Kind) => (k === 'info' ? 'Text shown in the app' : k === 'phone' ? 'Phone number' : 'Link (https://…)');
 
-export function EntryCard({ entry, sectionId, canMove, onMove }: {
-  entry: EntryVM; sectionId: string; canMove: boolean; onMove?: (dir: -1 | 1) => void;
+export function EntryCard({ entry, sectionId, canMove, onMove, notify }: {
+  entry: EntryVM; sectionId: string; canMove: boolean; onMove?: (dir: -1 | 1) => void; notify?: NotifyOptions;
 }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
@@ -114,7 +114,8 @@ export function EntryCard({ entry, sectionId, canMove, onMove }: {
         <div className="stack" style={{ gap: '.5rem' }}>
           {isFolder ? <Link className="list-link" href={`/content/${entry.id}`}><span>Open folder to manage its items</span><span aria-hidden>›</span></Link> : null}
           {entry.kind === 'pdf' && entry.perms.upload
-            ? <PdfUpload mode="replace" nodeId={entry.id} sectionId={sectionId} buttonLabel={entry.file_path ? 'Replace PDF' : 'Upload PDF'} />
+            ? <PdfUpload mode="replace" nodeId={entry.id} sectionId={sectionId} buttonLabel={entry.file_path ? 'Replace PDF' : 'Upload PDF'}
+                notify={notify ? { ...notify, itemLabel: entry.label } : undefined} />
             : null}
           <div className="row">
             {entry.perms.edit ? <button type="button" className="secondary" onClick={() => setEditing(true)}>Edit</button> : null}
@@ -132,7 +133,7 @@ export function EntryCard({ entry, sectionId, canMove, onMove }: {
   );
 }
 
-export function EntryList({ sectionId, entries, canReorder }: { sectionId: string; entries: EntryVM[]; canReorder: boolean }) {
+export function EntryList({ sectionId, entries, canReorder, notify }: { sectionId: string; entries: EntryVM[]; canReorder: boolean; notify?: NotifyOptions }) {
   const router = useRouter();
   const [order, setOrder] = useState(entries.map((e) => e.id));
   const [result, setResult] = useState<Result | null>(null);
@@ -154,14 +155,14 @@ export function EntryList({ sectionId, entries, canReorder }: { sectionId: strin
     <>
       <Feedback result={result} />
       {ids.map((id) => (
-        <EntryCard key={id} entry={byId.get(id)!} sectionId={sectionId} canMove={canReorder} onMove={(d) => move(id, d)} />
+        <EntryCard key={id} entry={byId.get(id)!} sectionId={sectionId} canMove={canReorder} onMove={(d) => move(id, d)} notify={notify} />
       ))}
     </>
   );
 }
 
-export function AddEntry({ sectionId, canUpload, canEdit, canAddFolder = false, inFolder = false }: {
-  sectionId: string; canUpload: boolean; canEdit: boolean; canAddFolder?: boolean; inFolder?: boolean;
+export function AddEntry({ sectionId, canUpload, canEdit, canAddFolder = false, inFolder = false, notify }: {
+  sectionId: string; canUpload: boolean; canEdit: boolean; canAddFolder?: boolean; inFolder?: boolean; notify?: NotifyOptions;
 }) {
   const router = useRouter();
   const [kind, setKind] = useState<AddKind>('url');
@@ -181,7 +182,7 @@ export function AddEntry({ sectionId, canUpload, canEdit, canAddFolder = false, 
       {canUpload ? (
         <details open={!canEdit}>
           <summary>Upload a new PDF</summary>
-          <PdfUpload mode="new-entry" nodeId={sectionId} sectionId={sectionId} buttonLabel="Choose PDF and publish" allowLabel />
+          <PdfUpload mode="new-entry" nodeId={sectionId} sectionId={sectionId} buttonLabel="Choose PDF and publish" allowLabel notify={notify} />
         </details>
       ) : null}
       {canEdit ? (

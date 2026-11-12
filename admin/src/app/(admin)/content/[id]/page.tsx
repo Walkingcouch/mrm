@@ -33,8 +33,10 @@ export default async function SectionPage({ params }: { params: Promise<{ id: st
         <p><Link href={`/content/${parent.id}`}>← {parent.label}</Link></p>
         <h1>{node.label}</h1>
         <p className="muted">A folder in {parent.label}. Shown in the app in this order.</p>
-        <EntryList sectionId={node.id} entries={items.map((e) => toVM(nodes, me, e))} canReorder={!!fp?.edit && parent.sort_mode === 'manual'} />
-        <AddEntry sectionId={node.id} canUpload={!!fp?.upload} canEdit={!!fp?.edit} inFolder />
+        <EntryList sectionId={node.id} entries={items.map((e) => toVM(nodes, me, e))} canReorder={!!fp?.edit && parent.sort_mode === 'manual'}
+          notify={{ sources: me.sources, placeLabel: `${parent.label} → ${node.label}` }} />
+        <AddEntry sectionId={node.id} canUpload={!!fp?.upload} canEdit={!!fp?.edit} inFolder
+          notify={{ sources: me.sources, placeLabel: `${parent.label} → ${node.label}` }} />
       </>
     );
   }
@@ -77,8 +79,10 @@ export default async function SectionPage({ params }: { params: Promise<{ id: st
       {section.sort_mode === 'newest_first'
         ? <p className="muted">Issues are listed newest first in the app. Upload each new monthly issue as a new PDF; older issues stay until removed.</p>
         : <p className="muted">Shown in the app in this order.</p>}
-      <EntryList sectionId={section.id} entries={vms} canReorder={!!sp?.edit && section.sort_mode === 'manual'} />
-      <AddEntry sectionId={section.id} canUpload={!!sp?.upload} canEdit={!!sp?.edit && section.key !== 'memorandum'} canAddFolder={section.key !== 'memorandum'} />
+      <EntryList sectionId={section.id} entries={vms} canReorder={!!sp?.edit && section.sort_mode === 'manual'}
+        notify={{ sources: me.sources, placeLabel: section.label }} />
+      <AddEntry sectionId={section.id} canUpload={!!sp?.upload} canEdit={!!sp?.edit && section.key !== 'memorandum'} canAddFolder={section.key !== 'memorandum'}
+        notify={{ sources: me.sources, placeLabel: section.label }} />
     </>
   );
 }
