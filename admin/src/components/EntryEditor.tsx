@@ -8,7 +8,6 @@ import { PdfUpload, type NotifyOptions } from './PdfUpload';
 import type { Result } from '@/lib/result';
 
 export type Kind = 'pdf' | 'url' | 'info' | 'phone' | 'map' | 'folder';
-type AddKind = Exclude<Kind, 'pdf'>;
 export interface EntryVM {
   id: string; label: string; kind: Kind; url: string | null; body: string | null; phone: string | null;
   file_name: string | null; file_path: string | null; updated: string; perms: { upload: boolean; edit: boolean; delete: boolean };
@@ -205,46 +204,79 @@ export function EntryList({ sectionId, entries, canReorder, notify, moveTargets 
   );
 }
 
+/** Simple line icons (teal) for the "Add" tiles. */
+const TILE_ICON: Record<Kind, React.ReactNode> = {
+  pdf: <path d="M7 3h7l5 5v13H7zM14 3v5h5M9.5 13h5M9.5 16.5h5" />,
+  url: <path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" />,
+  info: <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 11v5M12 7.5v.5" />,
+  phone: <path d="M6.6 3.5h3l1.5 4-2 1.3a11 11 0 0 0 6.1 6.1l1.3-2 4 1.5v3a2 2 0 0 1-2.2 2A16 16 0 0 1 4.6 5.7a2 2 0 0 1 2-2.2z" />,
+  map: <path d="M12 21s-6-5.6-6-10.5a6 6 0 0 1 12 0C18 15.4 12 21 12 21zM12 12.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />,
+  folder: <path d="M3.5 6.5a1.5 1.5 0 0 1 1.5-1.5h4.5l2 2.5H19a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 19 19.5H5A1.5 1.5 0 0 1 3.5 18z" />,
+};
+const TILE_TEXT: Record<Kind, { title: string; hint: string }> = {
+  pdf: { title: 'PDF document', hint: 'Upload a file' },
+  url: { title: 'Link or form', hint: 'A web page or online form' },
+  info: { title: 'Information', hint: 'A short piece of text' },
+  phone: { title: 'Phone number', hint: 'Tap to call in the app' },
+  map: { title: 'Map', hint: 'Directions or a location' },
+  folder: { title: 'Folder', hint: 'A heading that groups items' },
+};
+
 export function AddEntry({ sectionId, canUpload, canEdit, canAddFolder = false, inFolder = false, notify }: {
   sectionId: string; canUpload: boolean; canEdit: boolean; canAddFolder?: boolean; inFolder?: boolean; notify?: NotifyOptions;
 }) {
   const router = useRouter();
-  const [kind, setKind] = useState<AddKind>('url');
+  const [kind, setKind] = useState<Kind | null>(null);
   const [label, setLabel] = useState('');
   const [value, setValue] = useState('');
   const [result, setResult] = useState<Result | null>(null);
   const [pending, start] = useTransition();
   if (!canUpload && !canEdit) return null;
+  const kinds: Kind[] = [
+    ...(canUpload ? ['pdf' as const] : []),
+    ...(canEdit ? (['url', 'info', 'phone', 'map'] as const) : []),
+    ...(canEdit && canAddFolder ? ['folder' as const] : []),
+  ];
+  const choose = (k: Kind) => { setKind(kind === k ? null : k); setResult(null); };
   const add = () => start(async () => {
+    if (!kind || kind === 'pdf') return;
     const r = await createEntry(sectionId, kind, label, kind === 'folder' ? '' : value);
     setResult(r);
-    if (r.ok) { setLabel(''); setValue(''); router.refresh(); }
+    if (r.ok) { setLabel(''); setValue(''); setKind(null); router.refresh(); }
   });
   return (
-    <div className="card">
+    <div className="card add-card">
       <h2>{inFolder ? 'Add to this folder' : 'Add to this section'}</h2>
-      {canUpload ? (
-        <details open={!canEdit}>
-          <summary>Upload a new PDF</summary>
+      <p className="muted">Choose what to add.</p>
+      <div className="add-grid" role="group" aria-label="Type of item to add">
+        {kinds.map((k) => (
+          <button key={k} type="button" className={`add-tile${kind === k ? ' on' : ''}`} aria-pressed={kind === k} onClick={() => choose(k)}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{TILE_ICON[k]}</svg>
+            <span className="add-tile-title">{TILE_TEXT[k].title}</span>
+            <span className="add-tile-hint">{TILE_TEXT[k].hint}</span>
+          </button>
+        ))}
+      </div>
+
+      {kind === 'pdf' ? (
+        <div className="add-form">
           <PdfUpload mode="new-entry" nodeId={sectionId} sectionId={sectionId} buttonLabel="Choose PDF and publish" allowLabel notify={notify} />
-        </details>
-      ) : null}
-      {canEdit ? (
-        <details>
-          <summary>{canAddFolder ? 'Add a link, form, information, phone number, map or folder' : 'Add a link, form, information, phone number or map'}</summary>
-          <div className="field"><label htmlFor="new-kind">Type</label>
-            <select id="new-kind" value={kind} onChange={(e) => setKind(e.target.value as AddKind)}>
-              {(['url', 'info', 'phone', 'map', ...(canAddFolder ? ['folder'] : [])] as AddKind[]).map((k) => <option key={k} value={k}>{KIND_LABEL[k]}</option>)}
-            </select></div>
-          <div className="field"><label htmlFor="new-label">Name in app</label>
-            <input id="new-label" type="text" value={label} onChange={(e) => setLabel(e.target.value)} maxLength={120} /></div>
-          {kind === 'folder' ? <p className="muted">Create the folder, then open it to add items.</p> : (
+        </div>
+      ) : kind ? (
+        <div className="add-form">
+          <div className="field"><label htmlFor="new-label">{kind === 'folder' ? 'Folder name (shown as a heading in the app)' : 'Name in app'}</label>
+            <input id="new-label" type="text" value={label} onChange={(e) => setLabel(e.target.value)} maxLength={120} autoFocus
+              placeholder={kind === 'folder' ? 'e.g. Benefits & Rewards' : kind === 'phone' ? 'e.g. Call Security' : ''} /></div>
+          {kind === 'folder' ? <p className="muted">Then tick the items that belong in it and use Move.</p> : (
             <div className="field"><label htmlFor="new-value">{valueLabel(kind)}</label>
               <ValueField id="new-value" kind={kind} value={value} onChange={setValue} /></div>
           )}
           <Feedback result={result} />
-          <button type="button" onClick={add} disabled={pending || !label.trim()}>Add</button>
-        </details>
+          <div className="row">
+            <button type="button" onClick={add} disabled={pending || !label.trim()}>{pending ? 'Adding…' : `Add ${TILE_TEXT[kind].title.toLowerCase()}`}</button>
+            <button type="button" className="secondary" onClick={() => setKind(null)} disabled={pending}>Cancel</button>
+          </div>
+        </div>
       ) : null}
     </div>
   );

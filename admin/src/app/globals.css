@@ -116,3 +116,16 @@ details summary { cursor: pointer; min-height: 44px; display: flex; align-items:
 }
 .move-bar select { flex: 1 1 12rem; width: auto; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* "Add to this section" tiles */
+.add-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: .5rem; }
+.add-tile {
+  flex-direction: column; align-items: flex-start; justify-content: flex-start; text-align: left; gap: .15rem;
+  min-height: 96px; padding: .75rem; background: var(--row); color: var(--text); border: 1.5px solid var(--row); border-radius: var(--radius);
+}
+.add-tile svg { color: var(--brand); margin-bottom: .25rem; }
+.add-tile:hover { border-color: var(--brand); }
+.add-tile.on { background: var(--accent-soft); border-color: var(--brand); }
+.add-tile-title { font-weight: 600; font-size: .95rem; }
+.add-tile-hint { font-size: .8rem; color: var(--muted); line-height: 1.3; }
+.add-form { border-top: 1px solid var(--line); margin-top: 1rem; padding-top: 1rem; }
