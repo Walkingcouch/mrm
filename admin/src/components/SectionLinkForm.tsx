@@ -34,9 +34,13 @@ export function WeatherWidgetForm({ sectionId, html }: { sectionId: string; html
     <div className="card">
       <h2>WillyWeather widget (optional)</h2>
       <p className="muted">
-        Paste the embed code from WillyWeather&apos;s free widget builder, configured for McArthur River Mine Airport. Keep the
-        provider&apos;s attribution in the code. Leave empty to show the WillyWeather page link above instead. The widget must be
-        tested on real iPhone and Android devices before relying on it.
+        When set, the app&apos;s Weather page opens on <strong>Summary</strong> (this widget), with a <strong>Full forecast</strong> tab
+        for the page link above. Leave empty to show only the page link, with no tabs.
+      </p>
+      <p className="muted">
+        Paste the embed code from WillyWeather&apos;s free widget builder for McArthur River Mine Airport (width 400px suits phones).
+        Keep the provider&apos;s attribution in the code. Only code from willyweather.com.au is accepted. Check it on an iPhone and an
+        Android phone after changing it.
       </p>
       <div className="field">
         <label htmlFor="widget">Widget embed code</label>

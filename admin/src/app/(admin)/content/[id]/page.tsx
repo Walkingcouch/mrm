@@ -64,7 +64,7 @@ export default async function SectionPage({ params }: { params: Promise<{ id: st
       <>
         <h1>{section.label}</h1>
         {sp?.edit
-          ? <SectionLinkForm sectionId={section.id} url={section.url} help="The WillyWeather page for McArthur River Mine Airport. Used when no widget is set, or if the widget fails to load." />
+          ? <SectionLinkForm sectionId={section.id} url={section.url} help="The WillyWeather page for McArthur River Mine Airport. Shown under 'Full forecast' in the app, and on its own if no widget is set or the widget fails to load." />
           : <div className="card file-note">{section.url ?? 'Not set up yet.'}</div>}
         {me.is_top ? <WeatherWidgetForm sectionId={section.id} html={section.widget_html} /> : null}
       </>
