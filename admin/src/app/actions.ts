@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { after } from 'next/server';
 import { getMe } from '@/lib/me';
-import { serviceClient, userClient } from '@/lib/supabase/server';
+import { serviceClient, userClient, serviceKey } from '@/lib/supabase/server';
 import { LIMITS, SITE_URL, SUPABASE_URL, publicFileUrl } from '@/lib/env';
 import { friendly, type Result } from '@/lib/result';
 
@@ -233,7 +233,7 @@ async function triggerDispatch(messageId: string) {
   try {
     await fetch(`${SUPABASE_URL}/functions/v1/dispatch-push`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json', authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}` },
+      headers: { 'content-type': 'application/json', authorization: `Bearer ${serviceKey()}` },
       body: JSON.stringify({ message_id: messageId }),
       signal: AbortSignal.timeout(25_000),
     });
