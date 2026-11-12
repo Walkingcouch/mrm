@@ -29,9 +29,9 @@ export default async function MessagesPage() {
   );
 }
 
-/** "Kitchen Admin (kitchen@…)", just the email if the name is missing or generic, or a placeholder for removed accounts. */
+/** "Kitchen Admin (kitchen@…)", or just the email if there is no separate name. Messages imported from the old app have no sender on record. */
 function senderLabel(name: string | null, email: string | null): string {
   const n = name?.trim();
   if (email) return n && n.toLowerCase() !== email.toLowerCase() ? `${n} (${email})` : email;
-  return n || 'a removed administrator';
+  return n || 'not recorded';
 }
