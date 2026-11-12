@@ -7,8 +7,11 @@ import * as WebBrowser from 'expo-web-browser';
 import { Loading, Notice } from './ui';
 import { colors, fonts } from '@/lib/theme';
 
-export function InAppWeb({ url, html, baseUrl, fallbackUrl, ...rest }: {
+export function InAppWeb({ url, html, baseUrl, fallbackUrl, fileDir, webRef, ...rest }: {
   url?: string; html?: string; baseUrl?: string; fallbackUrl?: string;
+  /** file:// folder this view may read (cached PDFs on iOS). */
+  fileDir?: string | null;
+  webRef?: React.Ref<React.ComponentRef<typeof WebView>>;
 } & Partial<WebViewProps>) {
   const [failed, setFailed] = useState(false);
   const external = fallbackUrl ?? url;
@@ -26,14 +29,18 @@ export function InAppWeb({ url, html, baseUrl, fallbackUrl, ...rest }: {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <WebView
+        ref={webRef}
         source={html ? { html, baseUrl } : { uri: url! }}
-        originWhitelist={['https://*', 'about:*']}
+        originWhitelist={fileDir ? ['https://*', 'about:*', 'file://*'] : ['https://*', 'about:*']}
+        allowFileAccess={!!fileDir}
+        allowingReadAccessToURL={fileDir ?? undefined}
         startInLoadingState
         renderLoading={() => <Loading />}
         onError={() => setFailed(true)}
         onHttpError={(e) => { if (e.nativeEvent.statusCode >= 400 && !html) setFailed(true); }}
         onShouldStartLoadWithRequest={(req) => {
           if (/^https?:/i.test(req.url) || req.url.startsWith('about:')) return true;
+          if (fileDir && req.url.startsWith(fileDir)) return true;
           Linking.openURL(req.url).catch(() => {});
           return false;
         }}

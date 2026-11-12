@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react'
 import { AppState, FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useFocusEffect, useNavigation } from 'expo-router';
-import { loadMessages, SAMPLE_MODE, supabase, type MessageRow } from '@/lib/api';
+import { cachedMessages, loadMessages, SAMPLE_MODE, supabase, type MessageRow } from '@/lib/api';
 import { messagesChanged } from '@/lib/messages-live';
 import { seenMessages } from '@/lib/seen';
 import { formatDarwin } from '@/lib/time';
@@ -46,6 +46,15 @@ export function MessagesSection() {
   const [seen, setSeen] = useState<Set<string>>(new Set());
   const [error, setError] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Show the last list straight away (it is replaced by the live list a moment later).
+  useEffect(() => {
+    let on = true;
+    Promise.all([cachedMessages(), seenMessages.all()]).then(([m, s]) => {
+      if (on && m) { setMessages((cur) => cur ?? m); setSeen((cur) => (cur.size ? cur : s)); }
+    }).catch(() => {});
+    return () => { on = false; };
+  }, []);
 
   const load = useCallback(async () => {
     setRefreshing(true);

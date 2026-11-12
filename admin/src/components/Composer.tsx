@@ -50,7 +50,7 @@ export function Composer({ sources, globalGeneral, globalEmergency, routing }: {
         if (f.size > LIMITS.attachmentBytes) throw new Error(`“${f.name}” is larger than 15 MB.`);
         const t = await createUpload({ kind: 'attachment', requestId: requestId.current, fileName: f.name, size: f.size, mime });
         if (!t.ok || !t.data) throw new Error(t.ok ? 'Upload failed.' : t.error);
-        const { error } = await browserClient().storage.from('messages').uploadToSignedUrl(t.data.path, t.data.token, f, { contentType: mime });
+        const { error } = await browserClient().storage.from('messages').uploadToSignedUrl(t.data.path, t.data.token, f, { contentType: mime, cacheControl: '31536000' });
         if (error) throw new Error(`Couldn't upload “${f.name}”. Check your connection.`);
         setAtts((a) => [...a, { path: t.data!.path, name: f.name, mime, size: f.size }]);
       }

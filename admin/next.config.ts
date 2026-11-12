@@ -19,6 +19,12 @@ const nextConfig: NextConfig = {
         source: '/pdf-viewer/:path*',
         headers: [{ key: 'X-Content-Type-Options', value: 'nosniff' }],
       },
+      {
+        // pdf.js itself (~1.5 MB) changes only with a viewer upgrade: let phones
+        // keep it for a day and reuse it for a week while re-checking.
+        source: '/pdf-viewer/lib/:path*',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' }],
+      },
     ];
   },
 };

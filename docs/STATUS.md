@@ -25,7 +25,7 @@ Legend: ✅ implemented & automatically tested · 🟡 implemented, not yet veri
 | P | Resume/reconnect never auto-open; Messages refreshes on open | 🟡 | `useFocusEffect` refresh; no auto-navigation code. Device check. |
 | Q | Push denied ⇒ app still fully usable; no pop-up substitute | 🟡 | Permission result never gates content. Device check. |
 | R | Global ⇒ all installations; departmental per chosen rule | ✅ / ⛔ | Both modes tested. **Owner must choose the rule.** |
-| S | No login/profile/forms/paid APIs/offline docs/search/audit UI | ✅ | None exist in code or schema. |
+| S | No login/profile/forms/paid APIs/offline docs/search/audit UI | ✅ (changed) | None exist, except offline docs: added at the owner's request (12 Nov 2026). PDFs in the menu are preloaded on Wi-Fi and opened PDFs are kept (250 MB cap, 30 MB per file); see `mobile/src/lib/pdf-cache.ts`. |
 | T | Store-update feasibility from real account evidence | ⛔ | Needs owner's Apple/Google account access (docs/RELEASE.md). |
 | U | Apps + website on the real backend | ⛔ | Needs a Supabase project (not created — no purchase without approval). |
 | V | All admin workflows usable on phone browsers | 🟡 | Mobile-first CSS, no tables, 44px targets; production build passes. Needs phone check. |

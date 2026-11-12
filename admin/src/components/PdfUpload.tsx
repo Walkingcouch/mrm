@@ -40,7 +40,7 @@ export function PdfUpload({ mode, nodeId, sectionId, buttonLabel, allowLabel, no
       setBusy('Uploading…');
       const t = await createUpload({ kind: mode, nodeId, fileName: file.name, size: file.size, mime: 'application/pdf' });
       if (!t.ok || !t.data) throw new Error(t.ok ? 'Could not start the upload.' : t.error);
-      const { error } = await browserClient().storage.from(t.data.bucket).uploadToSignedUrl(t.data.path, t.data.token, file, { contentType: 'application/pdf' });
+      const { error } = await browserClient().storage.from(t.data.bucket).uploadToSignedUrl(t.data.path, t.data.token, file, { contentType: 'application/pdf', cacheControl: '31536000' });
       if (error) throw new Error('Upload failed. Check your connection — the current document has not changed.');
       setBusy('Publishing…');
       const r = await finalizePdf({ kind: mode, nodeId, entryId: t.data.entryId!, path: t.data.path, fileName: file.name, size: file.size, label, sectionId });

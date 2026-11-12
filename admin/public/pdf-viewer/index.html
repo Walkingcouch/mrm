@@ -36,7 +36,30 @@
   const zoomBar = document.getElementById('zoom');
   const fail = (msg) => { status.textContent = msg; status.hidden = false; zoomBar.hidden = true; };
 
-  const file = new URLSearchParams(location.search).get('file') || '';
+  const params = new URLSearchParams(location.search);
+  const file = params.get('file') || '';
+
+  // local=1: the app already has this document cached on the phone and hands
+  // the bytes over (window.__mrmPdfData, injected by the app itself). If they
+  // do not arrive within a few seconds, the document loads from its URL.
+  const localBytes = () => new Promise((resolve) => {
+    if (params.get('local') !== '1') return resolve(null);
+    let done = false;
+    const take = () => {
+      if (done || typeof window.__mrmPdfData !== 'string') return;
+      done = true;
+      try {
+        const bin = atob(window.__mrmPdfData);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        resolve(bytes);
+      } catch { resolve(null); }
+      window.__mrmPdfData = undefined;
+    };
+    window.__mrmLoadPdf = take;
+    take();
+    setTimeout(() => { if (!done) { done = true; resolve(null); } }, 4000);
+  });
   if (!ALLOWED_PREFIX || !file.startsWith(ALLOWED_PREFIX) || file.includes('..')) {
     fail('This document cannot be shown.');
   } else {
@@ -62,7 +85,13 @@
       rendering = false;
     };
     try {
-      doc = await pdfjsLib.getDocument({ url: file, isEvalSupported: false }).promise;
+      const data = await localBytes();
+      try {
+        doc = await pdfjsLib.getDocument(data ? { data, isEvalSupported: false } : { url: file, isEvalSupported: false }).promise;
+      } catch (e) {
+        if (!data) throw e;
+        doc = await pdfjsLib.getDocument({ url: file, isEvalSupported: false }).promise; // bad local copy
+      }
       status.hidden = true; zoomBar.hidden = false;
       await render();
       document.getElementById('in').onclick = () => { zoom = Math.min(zoom * 1.25, 4); render(); };

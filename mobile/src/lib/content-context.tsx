@@ -1,6 +1,15 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
-import { loadContent, type ContentSnapshot, type Section } from './api';
+import { loadContent, publicFileUrl, type ContentSnapshot, type Section } from './api';
+import { syncCache } from './pdf-cache';
+
+/** Every PDF in the menu, in menu order (sections first, then position). */
+function menuPdfUrls(s: ContentSnapshot): string[] {
+  return s.entries
+    .filter((e) => e.kind === 'pdf' && e.file_path)
+    .sort((a, b) => a.position - b.position)
+    .map((e) => publicFileUrl('content', e.file_path!));
+}
 
 // Fallback menu so navigation renders before the first fetch (and offline on
 // first launch). Labels/order match the agreed initial menu.
@@ -34,7 +43,12 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
     if (inflight.current) return inflight.current;
     setLoading(true);
     inflight.current = loadContent()
-      .then((s) => { setSnapshot(s); setError(s.fromCache); })
+      .then((s) => {
+        setSnapshot(s); setError(s.fromCache);
+        // Preload documents once the menu is on screen. Only a fresh menu can
+        // say what is no longer needed, so an offline (cached) menu skips this.
+        if (!s.fromCache) setTimeout(() => { syncCache(menuPdfUrls(s)); }, 3000);
+      })
       .catch(() => setError(true))
       .finally(() => { setLoading(false); inflight.current = null; });
     return inflight.current;

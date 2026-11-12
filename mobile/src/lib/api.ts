@@ -46,8 +46,8 @@ export interface ContentSnapshot { sections: Section[]; entries: Entry[]; fetche
 
 /**
  * Load all menu sections and entries. On network failure, fall back to the
- * last successfully loaded structure so the menu keeps working (documents
- * themselves are not stored offline).
+ * last successfully loaded structure so the menu keeps working (PDFs are
+ * cached separately, see pdf-cache.ts).
  */
 export async function loadContent(): Promise<ContentSnapshot> {
   if (SAMPLE_MODE) return { sections: sampleSections, entries: sampleEntries, fetchedAt: Date.now(), fromCache: false };
@@ -80,13 +80,24 @@ export function entriesFor(snap: ContentSnapshot, parent: { id: string; sort_mod
     : list.sort((a, b) => a.position - b.position);
 }
 
+const MESSAGES_CACHE_KEY = 'messages-cache-v1';
+
+/** The last list of messages seen on this device (shown instantly while the live list loads). */
+export async function cachedMessages(): Promise<MessageRow[] | null> {
+  if (SAMPLE_MODE) return null;
+  const raw = await AsyncStorage.getItem(MESSAGES_CACHE_KEY).catch(() => null);
+  try { return raw ? (JSON.parse(raw) as MessageRow[]) : null; } catch { return null; }
+}
+
 export async function loadMessages(): Promise<MessageRow[]> {
   if (SAMPLE_MODE) return sampleMessages;
   const { data, error } = await supabase
     .from('messages').select('id,source_label,scope,body,created_at')
     .order('created_at', { ascending: false }).limit(200);
   if (error) throw error;
-  return (data ?? []) as MessageRow[];
+  const rows = (data ?? []) as MessageRow[];
+  AsyncStorage.setItem(MESSAGES_CACHE_KEY, JSON.stringify(rows)).catch(() => {});
+  return rows;
 }
 
 export async function loadMessage(id: string): Promise<{ message: MessageRow; attachments: Attachment[] } | null> {
