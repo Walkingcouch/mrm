@@ -49,7 +49,8 @@ cp mobile/.env.example mobile/.env       # fill in values
    ```
    then run `supabase/setup/push_sweep_cron.sql`. (dispatch-push checks the header against Vault via
    `push_check_dispatch_secret`; setting PUSH_DISPATCH_SECRET as a function secret also works.)
-5b. Content from the live app: run `supabase/setup/live_content.sql`, then deploy
+5b. Content from the live app: run `supabase/setup/live_content.sql` and `supabase/setup/hr_live_layout.sql`
+   (HR & Payroll folders, order and icons), then deploy
    `supabase/functions/import-files` once and POST to it with the `x-dispatch-secret` header to copy
    the PDFs into storage; afterwards disable or delete it.
 6. Bootstrap the first App Developer (one time, SQL editor):
