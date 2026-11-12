@@ -1,7 +1,7 @@
 'use client';
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { createRole, setConfig, upsertSource } from '@/app/actions';
+import { createRole, deleteSource, setConfig, upsertSource } from '@/app/actions';
 import { Feedback } from './Forms';
 import type { Result } from '@/lib/result';
 
@@ -41,6 +41,12 @@ export function SourceRow({ s }: { s: { id: string | null; label: string; subscr
         const r = await upsertSource(s.id, label, sub, active); setResult(r);
         if (r.ok) { if (!s.id) setLabel(''); router.refresh(); }
       })}>{s.id ? 'Save' : 'Add source'}</button>
+      {s.id ? (
+        <button type="button" className="danger" disabled={pending} style={{ marginLeft: 8 }} onClick={() => {
+          if (!confirm(`Delete the source “${s.label}”?\n\nMessages already sent from it stay in the app under this name. Roles lose permission to send as it, and phones stop following it. This cannot be undone.`)) return;
+          start(async () => { const r = await deleteSource(s.id as string); setResult(r); if (r.ok) router.refresh(); });
+        }}>Delete</button>
+      ) : null}
     </div>
   );
 }

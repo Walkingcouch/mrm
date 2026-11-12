@@ -213,5 +213,19 @@ select app_register_installation(:'instE', :'secret', 'ios', 'ExponentPushToken[
 reset role;
 select test.check((select push_token is null from installations where id = :'instA'), 'Re-registered token moves to the new installation (no duplicate pushes)');
 
+---------------------------------------------------------------- delete source keeps messages
+select test.as_admin(:'super');
+select admin_upsert_source(null, 'Pop-up Bar', true, true) as src_del \gset
+select message_id as md from admin_send_message('20000000-0000-0000-0000-000000000008', :'src_del', 'department', 'Bar opens at 5.') \gset
+select test.as_admin(:'kitchen');
+select test.expect_error(format($$select admin_delete_source(%L)$$, :'src_del'), 'Non-top admin cannot delete a source');
+select test.as_admin(:'super');
+select test.check(admin_delete_source(:'src_del') = 1, 'Deleting a source reports the messages kept');
+reset role;
+select test.check(not exists (select 1 from message_sources where id = :'src_del'), 'Source is gone');
+select test.check((select source_id is null and source_label = 'Pop-up Bar' from messages where id = :'md'),
+  'Earlier message is kept with its team name');
+select test.check(not exists (select 1 from installation_subscriptions where source_id = :'src_del'), 'Phone follows for the source are removed');
+
 reset role;
 \echo 'messaging tests passed'
