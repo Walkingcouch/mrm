@@ -46,6 +46,11 @@ select app_register_installation(:'instA', :'secret', 'ios',     'ExponentPushTo
 select app_register_installation(:'instB', :'secret', 'android', 'ExponentPushToken[BBBB]', true);
 select app_register_installation(:'instC', :'secret', 'android', null, false);
 select app_register_installation(:'instD', :'secret', 'ios',     'ExponentPushToken[DDDD]', true);
+-- Team notifications default to ON: a new phone follows every team that offers them.
+select test.check(cardinality(app_get_subscriptions(:'instB', :'secret')) =
+  (select count(*) from message_sources where is_active and subscribable), 'New phones follow every team by default');
+-- Staff then choose: B switches everything off, A keeps only Kitchen, D only Gun Club.
+select app_set_subscriptions(:'instB', :'secret', '{}');
 select app_set_subscriptions(:'instA', :'secret', array[:'src_kitchen']::uuid[]);
 select app_set_subscriptions(:'instD', :'secret', array[:'src_gun']::uuid[]);
 select test.check(app_get_subscriptions(:'instA', :'secret') = array[:'src_kitchen']::uuid[], 'Installation reads back its subscriptions');
@@ -172,6 +177,13 @@ select test.as_service();
 select title as mu_title, body as mu_body, urgent as mu_urgent from push_claim_batch(:'mu', 100) limit 1 \gset
 select test.check(:'mu_title' = 'Emergency Notification' and :'mu_body' like 'Please read an important update%' and :'mu_urgent'::boolean,
   'Emergency push: "Emergency Notification" title, read-now summary, urgent channel');
+
+---------------------------------------------------------------- new team defaults on
+select test.as_admin(:'super');
+select admin_upsert_source(null, 'Laundry', true, true) as src_new \gset
+reset role;
+select test.check((select count(*) from installation_subscriptions where source_id = :'src_new') =
+  (select count(*) from installations), 'A newly created team is followed by every phone');
 
 ---------------------------------------------------------------- token reuse
 select test.as_anon();
