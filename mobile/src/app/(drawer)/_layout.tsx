@@ -5,7 +5,7 @@ import { Drawer, DrawerContentScrollView, type DrawerContentComponentProps } fro
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useContent } from '@/lib/content-context';
 import { appTitle, colors, fonts, sectionIcons } from '@/lib/theme';
-import { headerStyle } from '@/components/Header';
+import { MenuBackButton, headerStyle } from '@/components/Header';
 
 // Menu as in the current app: light grey panel, teal outline icon + teal label per item.
 function Menu(props: DrawerContentComponentProps) {
@@ -57,9 +57,13 @@ export default function DrawerLayout() {
       <Drawer.Screen name="index" options={{ title: appTitle }} />
       <Drawer.Screen
         name="section/[key]"
-        options={({ route }) => {
+        options={({ route, navigation }) => {
           const key = (route.params as { key?: string } | undefined)?.key;
-          return { title: sections.find((s) => s.key === key)?.label ?? appTitle };
+          return {
+            title: sections.find((s) => s.key === key)?.label ?? appTitle,
+            // "‹ Menu" brings the menu back up (Home is its first item).
+            headerLeft: () => <MenuBackButton onPress={() => navigation.openDrawer()} />,
+          };
         }}
       />
     </Drawer>

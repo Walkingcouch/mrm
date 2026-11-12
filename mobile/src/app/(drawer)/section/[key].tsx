@@ -1,5 +1,6 @@
-import React from 'react';
-import { useLocalSearchParams } from 'expo-router';
+import React, { useCallback } from 'react';
+import { BackHandler } from 'react-native';
+import { useFocusEffect, useLocalSearchParams, useNavigation } from 'expo-router';
 import { useContent } from '@/lib/content-context';
 import { Loading, Notice } from '@/components/ui';
 import { EntryList } from '@/components/EntryList';
@@ -12,6 +13,14 @@ export default function SectionScreen() {
   const { key } = useLocalSearchParams<{ key: string }>();
   const { snapshot, sections, refresh, error } = useContent();
   const section = sections.find((s) => s.key === key);
+  const navigation = useNavigation() as unknown as { openDrawer(): void };
+
+  // Android back button on a section brings the menu back up, like "‹ Menu".
+  // (When the menu is open, the back button closes it as usual.)
+  useFocusEffect(useCallback(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => { navigation.openDrawer(); return true; });
+    return () => sub.remove();
+  }, [navigation]));
 
   if (!section) return <Notice title="Section not found" />;
 
