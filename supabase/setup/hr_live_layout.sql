@@ -1,10 +1,9 @@
 -- HR & Payroll laid out exactly like the live app (screenshots, 12 Nov 2026):
 -- same order, two folders, live labels and icons. Run once after
 -- live_content.sql (needs migrations ...0800 and ...0900).
--- Two items exist in the live app but were not in the URL List; they are
--- created without a file and show "Not yet available" until a PDF is uploaded:
---   * McArthur River Mining Pty Ltd Enterprise Agreement 2019
---   * Payroll Schedule - 2025/26
+-- The 2019 Enterprise Agreement exists in the live app but was not in the URL
+-- List; it is created without a file and shows "Not yet available" until a PDF
+-- is uploaded. (Payroll Schedule - 2025/26 was dropped at the owner's request.)
 do $$
 declare
   hr  uuid := (select id from public.content_nodes where key = 'hr');
@@ -54,8 +53,6 @@ begin
   ) as m(old_label, new_label, pos, icon)
   where c.parent_id = hr and c.label = m.old_label;
 
-  insert into public.content_nodes (parent_id, kind, label, position, icon)
-  values (hr, 'pdf', 'Payroll Schedule - 2025/26', 70, 'calendar-clock-outline');
 end $$;
 
 select c.position, c.kind, c.label, c.icon, f.label as in_folder

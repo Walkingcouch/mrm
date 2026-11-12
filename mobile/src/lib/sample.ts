@@ -77,7 +77,6 @@ const ITEMS: Record<string, Item[]> = {
     ].map(withIcon('handshake-outline'))),
     withIcon('clipboard-text-outline')(link('Leave Request Update', 'https://mcarthurrivermine.wufoo.com/forms/mjeybgg139u8ra/')),
     withIcon('clipboard-text-outline')(link('Overtime Request Update', 'https://www.surveymonkey.com/r/MRM_Overtime_Request')),
-    withIcon('calendar-clock-outline')(['Payroll Schedule - 2025/26', 'pdf', null] as Item), // not in the URL List yet
     withIcon('calendar-clock-outline')(pdf('Payroll Schedule - 2026/27', 'Payroll_Schedule_26-27.pdf')),
     withIcon('calendar-clock-outline')(pdf('Payslip Guide', 'Payslip_Guide_2025b.pdf')),
     withIcon('clipboard-text-outline')(link('Northern Territory Residency Payment - EA Employees', null)), // blank in the live app
