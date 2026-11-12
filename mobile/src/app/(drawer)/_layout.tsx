@@ -9,7 +9,7 @@ import { appTitle, colors, fonts, sectionIcons } from '@/lib/theme';
 import { MenuBackButton, headerStyle } from '@/components/Header';
 
 // Menu as in the current app: light grey panel, teal outline icon + teal label per item.
-// The panel draws its own safe areas: the logo sits below the status bar /
+// The panel draws its own safe areas: the first item sits below the status bar /
 // notch / Dynamic Island, and the last item clears the home indicator or
 // Android gesture bar. Text scales with the phone's text size, within limits.
 function Menu(props: DrawerContentComponentProps) {
@@ -18,12 +18,9 @@ function Menu(props: DrawerContentComponentProps) {
   const insets = useSafeAreaInsets();
   return (
     <View style={styles.panel}>
-      <View style={[styles.brand, { paddingTop: insets.top + 10, paddingLeft: 20 + insets.left }]}>
-        <Text style={styles.title} maxFontSizeMultiplier={1.2} accessibilityRole="header">{appTitle}</Text>
-      </View>
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{ paddingTop: 6, paddingBottom: insets.bottom + 12, paddingLeft: insets.left }}
+        contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: insets.bottom + 12, paddingLeft: insets.left }}
         showsVerticalScrollIndicator={false}
       >
         {sections.map((s) => {
@@ -90,8 +87,6 @@ export default function DrawerLayout() {
 
 const styles = StyleSheet.create({
   panel: { flex: 1, backgroundColor: colors.drawer },
-  brand: { paddingBottom: 12, paddingRight: 20, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#D0D0D0' },
-  title: { color: colors.tealText, fontSize: 15, fontFamily: fonts.semibold, letterSpacing: 0.3 },
   item: {
     flexDirection: 'row', alignItems: 'center', minHeight: 48, paddingVertical: 7,
     marginHorizontal: 8, paddingLeft: 12, paddingRight: 12, gap: 14, borderRadius: 10,
