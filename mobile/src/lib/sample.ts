@@ -26,9 +26,13 @@ const SECTIONS: [string, string, SectionType, string?][] = [
   ['settings', 'Settings', 'settings'],
 ];
 
+// Owner's WillyWeather widget for McArthur River Mine Airport (12 Nov 2026).
+const WEATHER_WIDGET = '<div style="width: 400px;"><iframe style="display: block;" src="https://cdnres.willyweather.com.au/widget/loadView.html?id=80085" width="400" height="520" frameborder="0" scrolling="no"></iframe><a style="margin: -20px 0 0 0;text-indent: -9999em;height: 20px;z-index: 1;position: relative;display: block" href="https://www.willyweather.com.au/nt/katherine/mcarthur-river-mine-airport.html" rel="nofollow">https://www.willyweather.com.au/nt/katherine/mcarthur-river-mine-airport.html</a></div>';
+
 export const sampleSections: Section[] = SECTIONS.map(([key, label, section_type, url], i) => ({
   id: `sample-${key}`, key, label, position: (i + 1) * 10, section_type,
-  sort_mode: key === 'memorandum' ? 'newest_first' : 'manual', url: url ?? null, widget_html: null,
+  sort_mode: key === 'memorandum' ? 'newest_first' : 'manual', url: url ?? null,
+  widget_html: key === 'weather' ? WEATHER_WIDGET : null,
 }));
 
 type Item = [string, EntryKind, string | null, string?, string?, Item[]?]; // label, kind, value, created, icon, folder items
