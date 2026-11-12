@@ -17,8 +17,8 @@ function required(name: string, devFallback: string): string {
 
 const config: ExpoConfig = {
   name: APP_ENV === 'production' ? 'McArthur River Mine' : APP_ENV === 'preview' ? 'MRM Preview' : `MRM (${APP_ENV})`,
-  // Must match the Expo project at expo.dev/accounts/walkingcouch/projects/mrm-mcarthur-river-mine
-  owner: 'walkingcouch',
+  // Must match the Expo project at expo.dev/accounts/first-geospatial/projects/mrm-mcarthur-river-mine
+  owner: 'first-geospatial',
   slug: 'mrm-mcarthur-river-mine',
   version: '2.0.0',
   orientation: 'portrait',
@@ -52,7 +52,7 @@ const config: ExpoConfig = {
     supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
     supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
     pdfViewerUrl: process.env.EXPO_PUBLIC_PDF_VIEWER_URL,
-    // Expo project ID for expo.dev/accounts/walkingcouch/projects/mrm-mcarthur-river-mine
+    // Expo project ID for expo.dev/accounts/first-geospatial/projects/mrm-mcarthur-river-mine
     eas: { projectId: process.env.EAS_PROJECT_ID ?? 'e2d3ea56-113d-458a-8ef7-68e0619cb16d' },
   },
 };
