@@ -53,7 +53,7 @@ const config: ExpoConfig = {
     supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
     pdfViewerUrl: process.env.EXPO_PUBLIC_PDF_VIEWER_URL,
     // Expo project ID for expo.dev/accounts/first-geospatial/projects/mrm-mcarthur-river-mine
-    eas: { projectId: process.env.EAS_PROJECT_ID ?? 'e2d3ea56-113d-458a-8ef7-68e0619cb16d' },
+    eas: { projectId: process.env.EAS_PROJECT_ID ?? '7ce70da8-8d9e-443d-89e7-e907dcdfbe10' },
   },
 };
 
