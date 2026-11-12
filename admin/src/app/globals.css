@@ -156,3 +156,4 @@ details summary { cursor: pointer; min-height: 44px; display: flex; align-items:
 .link-button.danger { color: var(--danger); }
 .link-button:disabled { opacity: .5; cursor: default; }
 .msg-foot .link-button { min-height: 36px; padding: 0 .25rem; }
+.row-actions { display: flex; align-items: center; justify-content: space-between; gap: .75rem; flex-wrap: wrap; }

@@ -1,7 +1,7 @@
 'use client';
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { createRole, setConfig, upsertSource } from '@/app/actions';
+import { createRole, deleteSource, setConfig, upsertSource } from '@/app/actions';
 import { Feedback } from './Forms';
 import type { Result } from '@/lib/result';
 
@@ -37,10 +37,24 @@ export function SourceRow({ s }: { s: { id: string | null; label: string; subscr
       <label className="check"><input type="checkbox" checked={sub} onChange={(e) => setSub(e.target.checked)} /><span>Phone users can choose to follow this source</span></label>
       <label className="check"><input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} /><span>Active</span></label>
       <Feedback result={result} okText={s.id ? 'Saved.' : undefined} />
-      <button type="button" disabled={pending || !label.trim()} onClick={() => start(async () => {
-        const r = await upsertSource(s.id, label, sub, active); setResult(r);
-        if (r.ok) { if (!s.id) setLabel(''); router.refresh(); }
-      })}>{s.id ? 'Save' : 'Add source'}</button>
+      <div className="row-actions">
+        <button type="button" disabled={pending || !label.trim()} onClick={() => start(async () => {
+          const r = await upsertSource(s.id, label, sub, active); setResult(r);
+          if (r.ok) { if (!s.id) setLabel(''); router.refresh(); }
+        })}>{s.id ? 'Save' : 'Add source'}</button>
+        {s.id ? (
+          <button type="button" className="link-button danger" disabled={pending} onClick={() => {
+            if (!confirm(`Delete “${s.label}”?\n\nIt will no longer be available to send from, and phones will stop following it. `
+              + `Messages already sent from ${s.label} are kept in Employee Messages and the message log.`)) return;
+            start(async () => {
+              const r = await deleteSource(s.id!);
+              if (!r.ok) return setResult(r);
+              alert(`“${s.label}” deleted. ${r.data!.kept} message${r.data!.kept === 1 ? '' : 's'} from it kept.`);
+              router.refresh();
+            });
+          }}>Delete source</button>
+        ) : null}
+      </div>
     </div>
   );
 }

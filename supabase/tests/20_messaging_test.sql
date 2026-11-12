@@ -213,5 +213,29 @@ select app_register_installation(:'instE', :'secret', 'ios', 'ExponentPushToken[
 reset role;
 select test.check((select push_token is null from installations where id = :'instA'), 'Re-registered token moves to the new installation (no duplicate pushes)');
 
+---------------------------------------------------------------- deleting a source keeps its messages
+select count(*) as kitchen_msgs from messages where source_id = :'src_kitchen' \gset
+select test.as_admin(:'kitchen');
+select test.expect_error(format($$select admin_delete_source(%L)$$, :'src_kitchen'), 'Delegates cannot delete sources', '42501');
+select test.as_admin(:'super');
+select test.check(admin_delete_source(:'src_kitchen') = :kitchen_msgs, 'Deleting a source reports the messages kept');
+reset role;
+select test.check((select count(*) from messages where source_id = :'src_kitchen') = :kitchen_msgs and :kitchen_msgs > 0,
+  'Messages from a deleted source are kept, still linked to it');
+select test.check((select source_label from messages where id = :'m1') = 'Kitchen', 'Kept messages keep the team name');
+select test.check(not exists (select 1 from role_grants where source_id = :'src_kitchen'), 'Role permissions for the deleted source are removed');
+select test.check(not exists (select 1 from installation_subscriptions where source_id = :'src_kitchen'), 'Phones no longer follow the deleted source');
+select test.as_admin(:'kitchen');
+select test.check(not exists (select 1 from jsonb_array_elements(admin_me()->'sources') x where x->>'id' = :'src_kitchen'),
+  'Deleted source no longer offered for sending');
+select test.expect_error(format($$select * from admin_send_message(gen_random_uuid(), %L, 'department', 'x')$$, :'src_kitchen'),
+  'Cannot send from a deleted source', '22023');
+select test.as_admin(:'super');
+select test.expect_error(format($$select admin_upsert_source(%L, 'Kitchen', true, true)$$, :'src_kitchen'),
+  'A deleted source cannot be re-activated', 'P0002');
+select test.expect_error(format($$select admin_delete_source(%L)$$, :'src_kitchen'), 'Deleting twice reports not found', 'P0002');
+select test.as_anon();
+select test.check((select count(*) from messages where source_id = :'src_kitchen') = :kitchen_msgs, 'The app still shows the kept messages');
+
 reset role;
 \echo 'messaging tests passed'

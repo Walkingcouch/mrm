@@ -365,6 +365,17 @@ export async function upsertSource(id: string | null, label: string, subscribabl
   return { ok: true };
 }
 
+/** Delete a message source. Messages already sent from it are kept (soft delete). */
+export async function deleteSource(id: string): Promise<Result<{ kept: number }>> {
+  if (!isUuid(id)) return { ok: false, error: 'Invalid request.' };
+  const db = await userClient();
+  const { data, error } = await db.rpc('admin_delete_source', { p_id: id });
+  if (error) return { ok: false, error: friendly(error) };
+  revalidatePath('/sources');
+  revalidatePath('/messages');
+  return { ok: true, data: { kept: Number(data ?? 0) } };
+}
+
 export async function setConfig(key: 'departmental_push_mode' | 'support_text', value: string): Promise<Result> {
   const db = await userClient();
   const { error } = await db.rpc('admin_set_config', { p_key: key, p_value: value });
