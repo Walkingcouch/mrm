@@ -8,7 +8,7 @@ const FALLBACK: Section[] = [
   ['home', 'Home', 'home'], ['flight', 'Flight Tracker', 'web'], ['timetables', 'Timetables', 'list'],
   ['weather', 'Weather', 'weather'], ['messages', 'Employee Messages', 'messages'], ['village', 'MRM Village', 'list'],
   ['wellbeing', 'Wellbeing', 'list'], ['hr', 'HR & Payroll', 'list'], ['memorandum', 'Memorandum', 'list'],
-  ['report', 'Report & Fix It', 'list'], ['call', 'Call Us', 'list'], ['find', 'Find Us', 'list'], ['settings', 'Settings', 'settings'],
+  ['report', 'Report & Fix It', 'web'], ['call', 'Call Us', 'list'], ['find', 'Find Us', 'list'], ['settings', 'Settings', 'settings'],
 ].map(([key, label, t], i) => ({
   id: key, key, label, position: (i + 1) * 10, section_type: t as Section['section_type'],
   sort_mode: key === 'memorandum' ? 'newest_first' : 'manual', url: null, widget_html: null,

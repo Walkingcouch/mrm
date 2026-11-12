@@ -20,7 +20,7 @@ const SECTIONS: [string, string, SectionType, string?][] = [
   ['wellbeing', 'Wellbeing', 'list'],
   ['hr', 'HR & Payroll', 'list'],
   ['memorandum', 'Memorandum', 'list'],
-  ['report', 'Report & Fix It', 'list'],
+  ['report', 'Report & Fix It', 'web', 'https://www.surveymonkey.com/r/mrm_report_fixit'],
   ['call', 'Call Us', 'list'],
   ['find', 'Find Us', 'list'],
   ['settings', 'Settings', 'settings'],
@@ -89,7 +89,6 @@ const ITEMS: Record<string, Item[]> = {
     pdf('25th May 2026', '20260525_Memorandum.pdf', '2026-05-25T00:00:00Z'),
     pdf('27 March 2026', '20260327_Memorandum.pdf', '2026-03-27T00:00:00Z'),
   ],
-  report: [link('Report & Fix It', 'https://www.surveymonkey.com/r/mrm_report_fixit')],
   call: [
     phone('Call Emergency', '+61 8 8975 8222'),
     phone('Call Safety', '+61 427 964 158'),

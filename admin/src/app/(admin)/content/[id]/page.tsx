@@ -48,12 +48,18 @@ export default async function SectionPage({ params }: { params: Promise<{ id: st
   if (!sp?.access && !visibleEntries.length) notFound();
 
   if (section.section_type === 'web') {
+    const isFlight = section.key === 'flight';
     return (
       <>
         <h1>{section.label}</h1>
-        <p className="muted">The app opens this page in an in-app browser. Use the FlightAware page for McArthur River Mine Airport — not the FlightAware home or search page.</p>
+        <p className="muted">
+          {isFlight
+            ? 'The app opens this page in an in-app browser. Use the FlightAware page for McArthur River Mine Airport — not the FlightAware home or search page.'
+            : 'Tapping this menu item in the app opens this page straight away, in an in-app browser.'}
+        </p>
         {sp?.edit
-          ? <SectionLinkForm sectionId={section.id} url={section.url} help="Paste the exact airport page address from FlightAware." />
+          ? <SectionLinkForm sectionId={section.id} url={section.url}
+              help={isFlight ? 'Paste the exact airport page address from FlightAware.' : 'Paste the full address of the form (https://…).'} />
           : <div className="card file-note">{section.url ?? 'Not set up yet.'}</div>}
       </>
     );

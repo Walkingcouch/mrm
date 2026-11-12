@@ -15,6 +15,8 @@ delete from public.content_nodes where kind <> 'section';
 
 update public.content_nodes set url = 'https://flightaware.com/live/airport/YMHU' where key = 'flight';
 update public.content_nodes set url = 'https://www.willyweather.com.au/nt/katherine/mcarthur-river-mine-airport.html' where key = 'weather';
+-- Report & Fix It opens its form straight from the menu (no list in between).
+update public.content_nodes set section_type = 'web', url = 'https://www.surveymonkey.com/r/mrm_report_fixit' where key = 'report';
 
 with s as (select id, key from public.content_nodes where kind = 'section'),
 f(base) as (select 'https://storage.googleapis.com/gs.appbuild.io/apps/mcarthur/attachments/')
@@ -58,7 +60,6 @@ from s cross join f join (values
   ('hr',         'url', 'NT Residency Payment – EA Employees',     180, null, null),
   ('memorandum', 'pdf', '25th May 2026',                            10, '20260525_Memorandum.pdf', '2026-05-25T00:00:00+09:30'),
   ('memorandum', 'pdf', '27 March 2026',                            20, '20260327_Memorandum.pdf', '2026-03-27T00:00:00+09:30'),
-  ('report',     'url', 'Report & Fix It',                          10, 'https://www.surveymonkey.com/r/mrm_report_fixit', null),
   ('call',       'phone', 'Call Emergency',                         10, '+61 8 8975 8222', null),
   ('call',       'phone', 'Call Safety',                            20, '+61 427 964 158', null),
   ('call',       'phone', 'Call First Aid Centre',                  30, '+61 8 8975 8121', null),
