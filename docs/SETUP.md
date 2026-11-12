@@ -39,13 +39,19 @@ cp mobile/.env.example mobile/.env       # fill in values
    * Email templates — make **Invite user** and **Reset password** links point to:
      `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=invite` (use `type=recovery` for reset).
    * Configure custom SMTP before go-live (the built-in sender is rate-limited).
-4. Edge function:
-   ```bash
-   supabase functions deploy dispatch-push --no-verify-jwt
-   supabase secrets set --env-file supabase/functions/.env   # PUSH_DISPATCH_SECRET (+ EXPO_ACCESS_TOKEN if used)
+4. Edge function: `supabase functions deploy dispatch-push --no-verify-jwt`
+   (optional secret: EXPO_ACCESS_TOKEN if Expo push security is turned on).
+5. Enable `pg_cron` and `pg_net` (schema `extensions`), then create the Vault secrets inside the
+   database so the dispatch secret never has to be copied anywhere:
+   ```sql
+   select vault.create_secret(encode(extensions.gen_random_bytes(32), 'hex'), 'push_dispatch_secret');
+   select vault.create_secret('https://<project-ref>.supabase.co/functions/v1/dispatch-push', 'push_dispatch_url');
    ```
-5. Enable `pg_cron` and `pg_net` extensions, store the two Vault secrets, then run
-   `supabase/setup/push_sweep_cron.sql`.
+   then run `supabase/setup/push_sweep_cron.sql`. (dispatch-push checks the header against Vault via
+   `push_check_dispatch_secret`; setting PUSH_DISPATCH_SECRET as a function secret also works.)
+5b. Content from the live app: run `supabase/setup/live_content.sql`, then deploy
+   `supabase/functions/import-files` once and POST to it with the `x-dispatch-secret` header to copy
+   the PDFs into storage; afterwards disable or delete it.
 6. Bootstrap the first App Developer (one time, SQL editor):
    create the user under Authentication → Users → "Invite user", then
    ```sql

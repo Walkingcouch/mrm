@@ -7,7 +7,7 @@
 
 create or replace function public.app_register_installation(
   p_id uuid, p_secret text, p_platform text, p_push_token text, p_push_enabled boolean)
-returns void language plpgsql security definer set search_path = public, app as $$
+returns void language plpgsql security definer set search_path = public, app, extensions as $$
 declare h text := encode(digest(p_secret, 'sha256'), 'hex'); cur public.installations;
 begin
   if p_secret is null or length(p_secret) < 32 then raise exception 'Invalid secret' using errcode='22023'; end if;
@@ -32,7 +32,7 @@ begin
 end $$;
 
 create or replace function public.app_set_subscriptions(p_id uuid, p_secret text, p_sources uuid[])
-returns void language plpgsql security definer set search_path = public, app as $$
+returns void language plpgsql security definer set search_path = public, app, extensions as $$
 begin
   if not exists (select 1 from public.installations
                  where id = p_id and secret_hash = encode(digest(p_secret,'sha256'),'hex')) then
@@ -45,7 +45,7 @@ begin
 end $$;
 
 create or replace function public.app_get_subscriptions(p_id uuid, p_secret text)
-returns uuid[] language sql stable security definer set search_path = public, app as $$
+returns uuid[] language sql stable security definer set search_path = public, app, extensions as $$
   select coalesce(array_agg(sub.source_id), '{}')
   from public.installation_subscriptions sub
   join public.installations i on i.id = sub.installation_id

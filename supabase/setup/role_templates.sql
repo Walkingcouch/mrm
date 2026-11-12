@@ -19,7 +19,10 @@ begin
   insert into public.message_sources (label, position) values ('Cleaning', 30) returning id into s_clean;
   insert into public.message_sources (label, position) values ('Operations', 40) returning id into s_ops;
   insert into public.message_sources (label, position) values ('HR', 50) returning id into s_hr;
-  insert into public.message_sources (label, position, subscribable) values ('MRM Communications', 60, false) returning id into s_comms;
+  select id into s_comms from public.message_sources where label = 'MRM Communications';  -- live_content.sql may have created it
+  if s_comms is null then
+    insert into public.message_sources (label, position, subscribable) values ('MRM Communications', 60, false) returning id into s_comms;
+  end if;
 
   insert into public.roles (name) values ('Kitchen/Mess') returning id into r;
   insert into public.role_grants (role_id, permission_id, node_id, source_id) values

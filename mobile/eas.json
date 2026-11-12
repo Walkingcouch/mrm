@@ -17,7 +17,10 @@
         "buildType": "apk"
       },
       "env": {
-        "APP_ENV": "preview"
+        "APP_ENV": "preview",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://xovymcamhzftfemeoqcs.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_p4t1th6Hc_IryQAcfIc6DQ_qXp7Zaws",
+        "EXPO_PUBLIC_PDF_VIEWER_URL": "https://mrm-app-admin.vercel.app/pdf-viewer/index.html"
       }
     },
     "staging": {
