@@ -1,14 +1,44 @@
 // Employee Messages: refreshed every time the user opens it (acceptance P).
 // Includes messages older than 24 hours. Rows never mark a message seen.
-import React, { useCallback, useLayoutEffect, useState } from 'react';
-import { FlatList, Pressable, RefreshControl } from 'react-native';
+import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import { FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useFocusEffect, useNavigation } from 'expo-router';
 import { loadMessages, type MessageRow } from '@/lib/api';
 import { seenMessages } from '@/lib/seen';
 import { formatDarwin } from '@/lib/time';
-import { colors } from '@/lib/theme';
+import { colors, fonts } from '@/lib/theme';
 import { Loading, Notice, Row } from './ui';
+
+/**
+ * Double tick, top right. A small "Mark all as read" label appears while a
+ * mouse hovers over it, or when it is pressed and held on a phone. A normal
+ * tap marks everything as read.
+ */
+function MarkAllReadButton({ count, onPress }: { count: number; onPress: () => void }) {
+  const [tip, setTip] = useState(false);
+  useEffect(() => {
+    if (!tip) return;
+    const t = setTimeout(() => setTip(false), 2000);
+    return () => clearTimeout(t);
+  }, [tip]);
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      {tip ? (
+        <View pointerEvents="none" style={{ backgroundColor: colors.headerText, borderRadius: 6, paddingHorizontal: 10, paddingVertical: 6, marginRight: 2 }}>
+          <Text style={{ color: '#FFFFFF', fontFamily: fonts.regular, fontSize: 14 }}>Mark all as read</Text>
+        </View>
+      ) : null}
+      <Pressable accessibilityRole="button" accessibilityLabel={`Mark all ${count} messages as read`}
+        accessibilityHint="Clears the red dots. Messages stay in the list."
+        hitSlop={12} onPress={onPress} onLongPress={() => setTip(true)} delayLongPress={300}
+        onHoverIn={() => setTip(true)} onHoverOut={() => setTip(false)}
+        style={{ paddingHorizontal: 12, minHeight: 44, minWidth: 44, alignItems: 'center', justifyContent: 'center' }}>
+        <MaterialCommunityIcons name="check-all" size={28} color={colors.tealText} />
+      </Pressable>
+    </View>
+  );
+}
 
 export function MessagesSection() {
   const [messages, setMessages] = useState<MessageRow[] | null>(null);
@@ -42,12 +72,7 @@ export function MessagesSection() {
   useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: unread.length
-        ? () => (
-          <Pressable accessibilityRole="button" accessibilityLabel={`Mark all ${unread.length} messages as read`}
-            hitSlop={12} onPress={markAll} style={{ paddingHorizontal: 12, minHeight: 44, minWidth: 44, alignItems: 'center', justifyContent: 'center' }}>
-            <MaterialCommunityIcons name="check-all" size={28} color={colors.tealText} />
-          </Pressable>
-        )
+        ? () => <MarkAllReadButton count={unread.length} onPress={markAll} />
         : undefined,
     });
   }, [navigation, unread.length, markAll]);
