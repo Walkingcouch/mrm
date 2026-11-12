@@ -13,7 +13,7 @@ the accounts and signing. This must be confirmed from real account evidence (acc
 | Android package name | Play Console → App → Dashboard | Public listing: `io.appbuild.mcarthur` — to verify in console |
 | Play App Signing | Play Console → Test and release → App integrity | ❓ If Google manages the app signing key, a new upload key can be registered; if the builder holds the key, a transfer/reset is needed |
 | Apple: who owns the App Store Connect account for app id6450782901? | App Store Connect access | ❓ |
-| iOS bundle identifier | App Store Connect → App Information → Bundle ID | ❓ Not known — the store id `6450782901` is NOT a bundle id |
+| iOS bundle identifier | App Store Connect → App Information → Bundle ID | ❓ Not known — the store id `6450782901` is NOT a bundle id. Test builds use `dev.local.mrm.preview` (see docs/IOS.md) |
 | Certificates / provisioning | Apple Developer → Certificates, Identifiers & Profiles | ❓ |
 | Listing transfer (if accounts belong to the builder) | Apple "App Transfer" / Google "Transfer app" processes | ❓ |
 | Push credentials | New APNs key + Firebase project for the package | To create under owner's accounts |

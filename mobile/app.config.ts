@@ -26,7 +26,9 @@ const config: ExpoConfig = {
   icon: './assets/icon.png',
   userInterfaceStyle: 'light',
   ios: {
-    bundleIdentifier: required('IOS_BUNDLE_ID', 'dev.local.mrm'),
+    // Preview/test builds use a clearly non-store id so they never touch the live
+    // App Store app. Set IOS_BUNDLE_ID to override (e.g. an id the owner registers).
+    bundleIdentifier: required('IOS_BUNDLE_ID', APP_ENV === 'preview' ? 'dev.local.mrm.preview' : 'dev.local.mrm'),
     supportsTablet: true,
     infoPlist: { ITSAppUsesNonExemptEncryption: false },
   },
