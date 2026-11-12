@@ -2,11 +2,12 @@
 //   /doc/<entryId>                         -> content entry
 //   /doc/att?bucket=messages&path=..&name=.. -> message attachment
 import React, { useLayoutEffect } from 'react';
-import { Image, ScrollView } from 'react-native';
+import { Image, Platform, ScrollView } from 'react-native';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { publicFileUrl } from '@/lib/api';
 import { useContent } from '@/lib/content-context';
 import { PdfView } from '@/components/PdfView';
+import { InAppWeb } from '@/components/InAppWeb';
 import { Loading, Notice } from '@/components/ui';
 
 export default function DocScreen() {
@@ -22,8 +23,17 @@ export default function DocScreen() {
     if (!path) return <Notice title="File not found" />;
     const url = publicFileUrl('messages', path);
     if (mime?.startsWith('image/')) {
+      // Full screen, pinch to zoom. iOS zooms natively; Android's scroll view
+      // can't, so it shows the picture in a zoomable web view.
+      if (Platform.OS === 'android') {
+        const page = `<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,user-scalable=yes">
+<style>html,body{margin:0;height:100%;background:#000}body{display:flex;align-items:center;justify-content:center}
+img{max-width:100%;max-height:100%;object-fit:contain}</style></head><body><img src="${url.replace(/"/g, '%22')}" alt=""></body></html>`;
+        return <InAppWeb html={page} baseUrl="https://localhost/" setBuiltInZoomControls={false} />;
+      }
       return (
-        <ScrollView maximumZoomScale={4} minimumZoomScale={1} contentContainerStyle={{ flexGrow: 1 }}>
+        <ScrollView maximumZoomScale={5} minimumZoomScale={1} centerContent
+          style={{ backgroundColor: '#000' }} contentContainerStyle={{ flexGrow: 1 }}>
           <Image source={{ uri: url }} style={{ flex: 1, minHeight: 400 }} resizeMode="contain" accessibilityLabel={name} />
         </ScrollView>
       );

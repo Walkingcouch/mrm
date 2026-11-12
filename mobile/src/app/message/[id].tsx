@@ -4,11 +4,12 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { loadMessage, type Attachment, type MessageRow } from '@/lib/api';
+import { loadMessage, publicFileUrl, type Attachment, type MessageRow } from '@/lib/api';
 import { seenMessages } from '@/lib/seen';
 import { formatDarwin } from '@/lib/time';
 import { colors, fonts } from '@/lib/theme';
 import { Loading, Notice, Row } from '@/components/ui';
+import { ImagePreview } from '@/components/ImagePreview';
 
 export default function MessageScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -41,10 +42,12 @@ export default function MessageScreen() {
       {attachments.length > 0 ? (
         <View style={{ marginTop: 16 }}>
           <Text style={styles.attHead}>Attachments</Text>
-          {attachments.map((a) => (
-            <Row key={a.id} title={a.file_name} trailing="›"
-              onPress={() => router.push({ pathname: '/doc/[id]', params: { id: 'att', path: a.file_path, name: a.file_name, mime: a.mime_type } })} />
-          ))}
+          {attachments.map((a) => {
+            const open = () => router.push({ pathname: '/doc/[id]', params: { id: 'att', path: a.file_path, name: a.file_name, mime: a.mime_type } });
+            return a.mime_type.startsWith('image/')
+              ? <ImagePreview key={a.id} uri={publicFileUrl('messages', a.file_path)} name={a.file_name} onOpen={open} />
+              : <Row key={a.id} title={a.file_name} trailing="›" onPress={open} />;
+          })}
         </View>
       ) : null}
     </ScrollView>
