@@ -5,10 +5,11 @@
 export interface ClaimedRecipient {
   installation_id: string;
   push_token: string;
-  title: string;       // source name (OS-required title)
-  body: string;        // short excerpt
+  title: string;       // source name, or "Emergency Notification"
+  body: string;        // short preview, or a read-now line for emergencies
   expiration: number;  // unix seconds: absolute 24h deadline (never reset)
   message_id: string;
+  urgent?: boolean;    // global emergency: Android "Emergency messages" channel
 }
 
 export interface DeliveryResult {
@@ -43,6 +44,7 @@ export type ExpoTicket =
 
 export const EXPO_BATCH = 100; // Expo Push API maximum per request
 export const ANDROID_CHANNEL = 'messages';
+export const ANDROID_EMERGENCY_CHANNEL = 'emergency';
 
 export function toExpoMessage(r: ClaimedRecipient): ExpoMessage {
   return {
@@ -55,7 +57,7 @@ export function toExpoMessage(r: ClaimedRecipient): ExpoMessage {
     expiration: r.expiration,
     priority: 'high',
     sound: 'default',
-    channelId: ANDROID_CHANNEL,
+    channelId: r.urgent ? ANDROID_EMERGENCY_CHANNEL : ANDROID_CHANNEL,
   };
 }
 

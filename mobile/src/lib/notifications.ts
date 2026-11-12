@@ -11,6 +11,7 @@ import Constants from 'expo-constants';
 import { registerInstallation } from './installation';
 
 export const ANDROID_CHANNEL = 'messages';
+export const ANDROID_EMERGENCY_CHANNEL = 'emergency';
 
 // Foreground receipt: suppress app-controlled banners and sounds. The
 // notification may still sit in the OS notification list (not in the app).
@@ -45,6 +46,13 @@ export async function setUpPush(): Promise<PushState> {
       await Notifications.setNotificationChannelAsync(ANDROID_CHANNEL, {
         name: 'Messages',
         importance: Notifications.AndroidImportance.HIGH,
+      });
+      // Emergency messages get their own channel at the highest importance, so
+      // they make a sound and show at the top even if Messages is turned down.
+      await Notifications.setNotificationChannelAsync(ANDROID_EMERGENCY_CHANNEL, {
+        name: 'Emergency messages',
+        importance: Notifications.AndroidImportance.MAX,
+        enableVibrate: true,
       });
     }
     let state = await getPushState();

@@ -70,3 +70,11 @@ test('nothing claimed => nothing sent, still finishes', async () => {
   assert.equal(f.sent.length, 0);
   assert.equal(s.status, 'done');
 });
+
+test('emergency pushes use the emergency Android channel; others the messages channel', () => {
+  assert.equal(toExpoMessage(rec('a')).channelId, 'messages');
+  const e = toExpoMessage({ ...rec('b'), title: 'Emergency Notification', body: 'Please read an important update', urgent: true });
+  assert.equal(e.channelId, 'emergency');
+  assert.equal(e.title, 'Emergency Notification');
+  assert.equal(e.priority, 'high');
+});

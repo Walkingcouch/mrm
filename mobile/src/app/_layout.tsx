@@ -10,6 +10,7 @@ import { ContentProvider } from '@/lib/content-context';
 import { setUpPush } from '@/lib/notifications';
 import { handledNotifications } from '@/lib/seen';
 import { shouldNavigateForTap } from '@/lib/seen-core';
+import { messagesChanged } from '@/lib/messages-live';
 import { colors } from '@/lib/theme';
 import { BackButton, headerStyle } from '@/components/Header';
 
@@ -32,7 +33,10 @@ function NotificationTapHandler() {
     Notifications.getLastNotificationResponseAsync().then((r) => { if (r) open(r); }).catch(() => {});
     // Taps while running / backgrounded.
     const sub = Notifications.addNotificationResponseReceivedListener(open);
-    return () => sub.remove();
+    // A push arriving while the app is open only refreshes Employee Messages
+    // (if it is on screen); nothing is shown or opened.
+    const received = Notifications.addNotificationReceivedListener(() => messagesChanged.emit());
+    return () => { sub.remove(); received.remove(); };
   }, []);
   return null;
 }

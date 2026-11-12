@@ -159,6 +159,20 @@ select test.check((select count(*) from push_claim_batch(:'me', 100)) = 2, 'In e
 select test.as_admin(:'dev');
 select admin_set_config('departmental_push_mode', '"subscribers"');
 
+---------------------------------------------------------------- notification wording
+select test.as_admin(:'kitchen');
+select message_id as mw from admin_send_message('20000000-0000-0000-0000-000000000006', :'src_kitchen', 'department', 'Menu has been updated for tonight.') \gset
+select test.as_service();
+select title as mw_title, body as mw_body, urgent as mw_urgent from push_claim_batch(:'mw', 100) limit 1 \gset
+select test.check(:'mw_title' = 'Kitchen' and :'mw_body' = 'Menu has been updated for tonight.' and not :'mw_urgent'::boolean,
+  'Normal push: title is the team, body is a preview of the message');
+select test.as_admin(:'super');
+select message_id as mu from admin_send_message('20000000-0000-0000-0000-000000000007', :'src_comms', 'global_emergency', 'Cyclone warning: stay indoors.') \gset
+select test.as_service();
+select title as mu_title, body as mu_body, urgent as mu_urgent from push_claim_batch(:'mu', 100) limit 1 \gset
+select test.check(:'mu_title' = 'Emergency Notification' and :'mu_body' like 'Please read an important update%' and :'mu_urgent'::boolean,
+  'Emergency push: "Emergency Notification" title, read-now summary, urgent channel');
+
 ---------------------------------------------------------------- token reuse
 select test.as_anon();
 select app_register_installation(:'instE', :'secret', 'ios', 'ExponentPushToken[AAAA]', true);
