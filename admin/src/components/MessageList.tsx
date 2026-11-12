@@ -5,7 +5,7 @@ import { deleteMessage } from '@/app/actions';
 import { Feedback } from './Forms';
 import type { Result } from '@/lib/result';
 
-export interface MessageVM { id: string; source_label: string; scope: string; body: string; when: string; status: string; can_delete: boolean }
+export interface MessageVM { id: string; source_label: string; scope: string; body: string; when: string; status: string; can_delete: boolean; sender: string }
 
 const STATUS: Record<string, string> = {
   pending: 'Notifying…', dispatching: 'Notifying…', done: 'Notifications sent', expired: 'Notification window closed', not_requested: 'No notification',
@@ -25,7 +25,7 @@ export function MessageList({ messages }: { messages: MessageVM[] }) {
             <strong>{m.source_label}</strong>
             {m.scope === 'global_emergency' ? <span className="badge danger">Emergency</span> : m.scope === 'global_general' ? <span className="badge">Site-wide</span> : null}
           </div>
-          <p className="muted" style={{ marginBottom: '.25rem' }}>{m.when} · {STATUS[m.status] ?? m.status}</p>
+          <p className="muted" style={{ marginBottom: '.25rem' }}>{m.when} · Sent by {m.sender} · {STATUS[m.status] ?? m.status}</p>
           <p style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{m.body}</p>
           {m.can_delete ? (
             <button type="button" className="danger" disabled={pending} onClick={() => {

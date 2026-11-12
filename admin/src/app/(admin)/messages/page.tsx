@@ -13,8 +13,11 @@ export default async function MessagesPage() {
     db.rpc('admin_list_messages', { p_limit: 50 }),
     db.rpc('app_public_config'),
   ]);
-  const messages: MessageVM[] = ((rows ?? []) as { id: string; source_label: string; scope: string; body: string; created_at: string; push_status: string; can_delete: boolean }[])
-    .map((m) => ({ id: m.id, source_label: m.source_label, scope: m.scope, body: m.body, when: formatDarwin(m.created_at), status: m.push_status, can_delete: m.can_delete }));
+  type Row = { id: string; source_label: string; scope: string; body: string; created_at: string; push_status: string; can_delete: boolean;
+    sent_by_name: string | null; sent_by_email: string | null };
+  const messages: MessageVM[] = ((rows ?? []) as Row[])
+    .map((m) => ({ id: m.id, source_label: m.source_label, scope: m.scope, body: m.body, when: formatDarwin(m.created_at), status: m.push_status, can_delete: m.can_delete,
+      sender: senderLabel(m.sent_by_name, m.sent_by_email) }));
   return (
     <>
       <h1>Employee Messages</h1>
@@ -24,4 +27,11 @@ export default async function MessagesPage() {
       <MessageList messages={messages} />
     </>
   );
+}
+
+/** "Kitchen Admin (kitchen@…)", just the email if the name is missing or generic, or a placeholder for removed accounts. */
+function senderLabel(name: string | null, email: string | null): string {
+  const n = name?.trim();
+  if (email) return n && n.toLowerCase() !== email.toLowerCase() ? `${n} (${email})` : email;
+  return n || 'a removed administrator';
 }

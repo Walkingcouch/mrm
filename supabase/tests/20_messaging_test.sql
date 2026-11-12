@@ -77,6 +77,12 @@ select test.check((select abs(extract(epoch from (push_deadline - created_at)) -
 select test.check(not exists (select 1 from information_schema.columns where table_name = 'messages'
   and column_name in ('title','category','expires_at','scheduled_at','status_approval')), 'No title/category/schedule/expiry/approval fields exist (K)');
 
+-- The admin log shows who sent the message.
+select test.check((select sent_by_email from admin_list_messages(200) where id = :'m1') = 'kitchen@example.test',
+  'Message log shows the sender');
+select test.check((select sent_by_name from admin_list_messages(200) where id = :'m1') = 'Kitchen',
+  'Message log shows the sender name');
+
 select test.as_admin(:'kitchen');
 select test.expect_error(format($$select * from admin_send_message(gen_random_uuid(), %L, 'department', 'x')$$, :'src_gun'),
   'Kitchen admin cannot impersonate the Gun Club source', '42501');
