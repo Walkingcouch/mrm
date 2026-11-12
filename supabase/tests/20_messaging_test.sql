@@ -85,6 +85,8 @@ select message_id as m_link from admin_send_message(gen_random_uuid(), :'src_kit
 select test.check((select link_node_id from messages where id = :'m_link') = :'linked'::uuid, 'Message stores its linked item');
 select test.expect_error(format($$select * from admin_send_message(gen_random_uuid(), %L, 'department', 'x', '[]'::jsonb, gen_random_uuid())$$, :'src_kitchen'),
   'A link to a missing item is refused', '22023');
+select test.check((select link_label from admin_list_messages(200) where id = :'m_link') = 'Linked item', 'Message log shows the linked item');
+select test.check((select attachment_count from admin_list_messages(200) where id = :'m_link') = 0, 'Message log counts attachments');
 select test.as_anon();
 select test.check((select link_node_id from messages where id = :'m_link') = :'linked'::uuid, 'App can read the linked item');
 select test.as_admin(:'super');
