@@ -26,6 +26,16 @@ export class IdSet {
     await this.kv.set(this.key, JSON.stringify(ids));
     return true;
   }
+  /** Add several ids in one write ("Mark all as read"). Returns how many were new. */
+  async addMany(newIds: string[]): Promise<number> {
+    const ids = await this.load();
+    const fresh = [...new Set(newIds)].filter((id) => !ids.includes(id));
+    if (!fresh.length) return 0;
+    ids.push(...fresh);
+    if (ids.length > MAX_IDS) ids.splice(0, ids.length - MAX_IDS);
+    await this.kv.set(this.key, JSON.stringify(ids));
+    return fresh.length;
+  }
 }
 
 /**

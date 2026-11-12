@@ -31,3 +31,13 @@ test('seen set persists and is bounded', async () => {
   for (let i = 0; i < 600; i++) await s.add(`x${i}`);
   assert.equal((await s.all()).size, 500);
 });
+
+test('mark all as read adds every id in one write and keeps them on reload', async () => {
+  const kv = memKV();
+  const s = new IdSet(kv, 'seen');
+  await s.add('a');
+  assert.equal(await s.addMany(['a', 'b', 'c', 'b']), 2);
+  assert.equal(await s.addMany(['a', 'b']), 0);
+  const reloaded = await new IdSet(kv, 'seen').all();
+  assert.deepEqual([...reloaded].sort(), ['a', 'b', 'c']);
+});

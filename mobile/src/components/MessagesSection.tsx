@@ -1,8 +1,9 @@
 // Employee Messages: refreshed every time the user opens it (acceptance P).
 // Includes messages older than 24 hours. Rows never mark a message seen.
-import React, { useCallback, useState } from 'react';
-import { FlatList, RefreshControl } from 'react-native';
-import { router, useFocusEffect } from 'expo-router';
+import React, { useCallback, useLayoutEffect, useState } from 'react';
+import { FlatList, Pressable, RefreshControl } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { router, useFocusEffect, useNavigation } from 'expo-router';
 import { loadMessages, type MessageRow } from '@/lib/api';
 import { seenMessages } from '@/lib/seen';
 import { formatDarwin } from '@/lib/time';
@@ -28,6 +29,30 @@ export function MessagesSection() {
   }, []);
 
   useFocusEffect(useCallback(() => { load(); }, [load]));
+
+  // "Mark all as read" (double tick, top right): clears every red dot at once. Only shown while
+  // something is unread; it never opens or shows a message by itself.
+  const navigation = useNavigation();
+  const unread = (messages ?? []).filter((m) => !seen.has(m.id));
+  const markAll = useCallback(async () => {
+    if (!messages) return;
+    await seenMessages.addMany(messages.map((m) => m.id)).catch(() => 0);
+    setSeen(await seenMessages.all());
+  }, [messages]);
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: unread.length
+        ? () => (
+          <Pressable accessibilityRole="button" accessibilityLabel={`Mark all ${unread.length} messages as read`}
+            hitSlop={12} onPress={markAll} style={{ paddingHorizontal: 12, minHeight: 44, minWidth: 44, alignItems: 'center', justifyContent: 'center' }}>
+            <MaterialCommunityIcons name="check-all" size={28} color={colors.tealText} />
+          </Pressable>
+        )
+        : undefined,
+    });
+  }, [navigation, unread.length, markAll]);
+  // The section screen is shared by all menu items: remove the button when leaving.
+  useLayoutEffect(() => () => navigation.setOptions({ headerRight: undefined }), [navigation]);
 
   if (!messages) {
     return error
