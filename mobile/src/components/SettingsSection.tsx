@@ -5,7 +5,7 @@ import { Linking, ScrollView, StyleSheet, Switch, Text, View } from 'react-nativ
 import { useFocusEffect } from 'expo-router';
 import * as Application from 'expo-application';
 import Constants from 'expo-constants';
-import { loadPublicConfig, loadSources, type Source } from '@/lib/api';
+import { loadPublicConfig, loadSources, SAMPLE_MODE, type Source } from '@/lib/api';
 import { getSubscriptions, setSubscriptions } from '@/lib/installation';
 import { getPushState, setUpPush, type PushState } from '@/lib/notifications';
 import { colors, fonts } from '@/lib/theme';
@@ -76,6 +76,9 @@ export function SettingsSection() {
         Version {Application.nativeApplicationVersion ?? Constants.expoConfig?.version} ({Application.nativeBuildVersion ?? 'dev'})
       </Text>
       <Text style={styles.small}>This app does not collect personal information. Content in this app is publicly accessible.</Text>
+      {SAMPLE_MODE ? (
+        <Text style={styles.small}>Test version: shows the current app&apos;s links and documents, and is not connected to the admin website. Messages sent from the admin website won&apos;t appear yet.</Text>
+      ) : null}
     </ScrollView>
   );
 }

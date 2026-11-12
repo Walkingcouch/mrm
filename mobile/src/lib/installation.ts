@@ -3,7 +3,7 @@
 // the app creates a new installation (documented limitation).
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Crypto from 'expo-crypto';
-import { supabase } from './api';
+import { SAMPLE_MODE, supabase } from './api';
 
 const KEY = 'installation-v1';
 export interface Installation { id: string; secret: string }
@@ -22,6 +22,7 @@ export async function getInstallation(): Promise<Installation> {
 }
 
 export async function registerInstallation(platform: 'ios' | 'android', pushToken: string | null): Promise<void> {
+  if (SAMPLE_MODE) return; // no backend to register with
   const inst = await getInstallation();
   const { error } = await supabase.rpc('app_register_installation', {
     p_id: inst.id, p_secret: inst.secret, p_platform: platform,
@@ -31,6 +32,7 @@ export async function registerInstallation(platform: 'ios' | 'android', pushToke
 }
 
 export async function getSubscriptions(): Promise<string[]> {
+  if (SAMPLE_MODE) return [];
   const inst = await getInstallation();
   const { data, error } = await supabase.rpc('app_get_subscriptions', { p_id: inst.id, p_secret: inst.secret });
   if (error) throw error;
@@ -38,6 +40,7 @@ export async function getSubscriptions(): Promise<string[]> {
 }
 
 export async function setSubscriptions(sourceIds: string[]): Promise<void> {
+  if (SAMPLE_MODE) return;
   const inst = await getInstallation();
   const { error } = await supabase.rpc('app_set_subscriptions', { p_id: inst.id, p_secret: inst.secret, p_sources: sourceIds });
   if (error) throw error;

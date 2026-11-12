@@ -4,7 +4,7 @@
 // from this project's storage. No external PDF app is launched.
 import React from 'react';
 import { Platform } from 'react-native';
-import { PDF_VIEWER_URL } from '@/lib/api';
+import { PDF_VIEWER_URL, SAMPLE_MODE } from '@/lib/api';
 import { InAppWeb } from './InAppWeb';
 import { Notice } from './ui';
 
@@ -12,7 +12,12 @@ export function PdfView({ fileUrl }: { fileUrl: string }) {
   if (Platform.OS === 'ios') {
     return <InAppWeb url={fileUrl} />;
   }
-  if (!PDF_VIEWER_URL) return <Notice title="Document viewer not configured" />;
+  if (!PDF_VIEWER_URL) {
+    // Sample-content test builds only: the project's own viewer is part of the
+    // backend set-up, so show the live app's PDFs through Google's viewer meanwhile.
+    if (SAMPLE_MODE) return <InAppWeb url={`https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(fileUrl)}`} />;
+    return <Notice title="Document viewer not configured" />;
+  }
   const viewer = `${PDF_VIEWER_URL}?file=${encodeURIComponent(fileUrl)}`;
   return <InAppWeb url={viewer} setBuiltInZoomControls={false} />;
 }
