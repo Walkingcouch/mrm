@@ -3,6 +3,7 @@
 // the app creates a new installation (documented limitation).
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Crypto from 'expo-crypto';
+import { Platform } from 'react-native';
 import { SAMPLE_MODE, supabase } from './api';
 
 const KEY = 'installation-v1';
@@ -22,7 +23,7 @@ export async function getInstallation(): Promise<Installation> {
 }
 
 export async function registerInstallation(platform: 'ios' | 'android', pushToken: string | null): Promise<void> {
-  if (SAMPLE_MODE) return; // no backend to register with
+  if (SAMPLE_MODE || Platform.OS === 'web') return; // no backend / demo browsers are never registered
   const inst = await getInstallation();
   const { error } = await supabase.rpc('app_register_installation', {
     p_id: inst.id, p_secret: inst.secret, p_platform: platform,

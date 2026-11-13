@@ -27,7 +27,8 @@ Notifications.setNotificationHandler({
 export type PushState = 'granted' | 'denied' | 'undetermined' | 'unsupported';
 
 export async function getPushState(): Promise<PushState> {
-  if (!Device.isDevice) return 'unsupported';
+  // The web build (demo site) shows in-app banners instead of real push.
+  if (Platform.OS === 'web' || !Device.isDevice) return 'unsupported';
   const p = await Notifications.getPermissionsAsync();
   if (p.granted || p.ios?.status === Notifications.IosAuthorizationStatus.PROVISIONAL) return 'granted';
   return p.canAskAgain ? 'undetermined' : 'denied';
@@ -39,6 +40,7 @@ export async function getPushState(): Promise<PushState> {
  * Messages section work regardless of the outcome (acceptance Q).
  */
 export async function setUpPush(): Promise<PushState> {
+  if (Platform.OS === 'web') return 'unsupported'; // demo site: never registers a browser
   const platform = Platform.OS === 'ios' ? 'ios' : 'android';
   try {
     if (Platform.OS === 'android') {

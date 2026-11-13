@@ -6,7 +6,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import { sampleEntries, sampleMessage, sampleMessages, sampleSections } from './sample';
 
-const extra = (Constants.expoConfig?.extra ?? {}) as Record<string, string | undefined>;
+// Phone builds read these from app.config.ts (extra). The web build can't, so
+// it falls back to the same public EXPO_PUBLIC_* values, inlined at build time.
+const fromConfig = (Constants.expoConfig?.extra ?? {}) as Record<string, string | undefined>;
+const extra: Record<string, string | undefined> = {
+  supabaseUrl: fromConfig.supabaseUrl || process.env.EXPO_PUBLIC_SUPABASE_URL,
+  supabaseAnonKey: fromConfig.supabaseAnonKey || process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
+  pdfViewerUrl: fromConfig.pdfViewerUrl || process.env.EXPO_PUBLIC_PDF_VIEWER_URL,
+};
 export const SUPABASE_URL = extra.supabaseUrl ?? '';
 export const PDF_VIEWER_URL = extra.pdfViewerUrl ?? '';
 export const IS_CONFIGURED = Boolean(extra.supabaseUrl && extra.supabaseAnonKey);

@@ -1,7 +1,7 @@
 // Employee Messages: refreshed every time the user opens it (acceptance P).
 // Includes messages older than 24 hours. Rows never mark a message seen.
 import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
-import { AppState, FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
+import { AppState, FlatList, Pressable, RefreshControl, Text, View, Platform } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router, useFocusEffect, useNavigation } from 'expo-router';
 import { cachedMessages, loadMessages, SAMPLE_MODE, supabase, type MessageRow } from '@/lib/api';
@@ -83,7 +83,8 @@ export function MessagesSection() {
     const offPush = messagesChanged.subscribe(reloadQuietly);
     const appState = AppState.addEventListener('change', (st) => { if (st === 'active') reloadQuietly(); });
     const timer = setInterval(reloadQuietly, 60_000);
-    const channel = SAMPLE_MODE ? null
+    // (Web demo: DemoNotifications listens instead and emits messagesChanged.)
+    const channel = SAMPLE_MODE || Platform.OS === 'web' ? null
       : supabase.channel('employee-messages').on('broadcast', { event: 'changed' }, () => { reloadQuietly(); }).subscribe();
     return () => {
       offPush(); appState.remove(); clearInterval(timer);

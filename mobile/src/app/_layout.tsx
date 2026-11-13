@@ -13,6 +13,8 @@ import { shouldNavigateForTap } from '@/lib/seen-core';
 import { messagesChanged } from '@/lib/messages-live';
 import { colors } from '@/lib/theme';
 import { BackButton, headerStyle } from '@/components/Header';
+import { DemoNotifications } from '@/components/DemoNotifications';
+import { Platform } from 'react-native';
 
 /**
  * Opens a message ONLY when the user deliberately taps its OS notification.
@@ -50,7 +52,7 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <ContentProvider>
           <StatusBar style="dark" />
-          <NotificationTapHandler />
+          {Platform.OS === 'web' ? <DemoNotifications /> : <NotificationTapHandler />}
           <Stack
             screenOptions={{
               ...headerStyle,

@@ -6,7 +6,8 @@ import React from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { colors, fonts } from '@/lib/theme';
 
-const EMBEDDABLE = [/^https:\/\/docs\.google\.com\/gview/i, /\.pdf(\?|#|$)/i];
+// Our own PDF viewer (admin website), Google's document viewer and direct PDF links.
+const EMBEDDABLE = [/\/pdf-viewer\/index\.html\?file=/i, /^https:\/\/docs\.google\.com\/gview/i, /\.pdf(\?|#|$)/i];
 
 function siteName(url: string): string {
   try { return new URL(url).hostname.replace(/^www\./, ''); } catch { return 'Web page'; }
