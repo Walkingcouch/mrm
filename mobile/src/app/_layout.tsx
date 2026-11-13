@@ -14,6 +14,7 @@ import { messagesChanged } from '@/lib/messages-live';
 import { colors } from '@/lib/theme';
 import { BackButton, headerStyle } from '@/components/Header';
 import { DemoNotifications } from '@/components/DemoNotifications';
+import { DemoChrome } from '@/components/DemoChrome';
 import { Platform } from 'react-native';
 
 /**
@@ -52,7 +53,7 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <ContentProvider>
           <StatusBar style="dark" />
-          {Platform.OS === 'web' ? <DemoNotifications /> : <NotificationTapHandler />}
+          {Platform.OS === 'web' ? null : <NotificationTapHandler />}
           <Stack
             screenOptions={{
               ...headerStyle,
@@ -68,6 +69,8 @@ export default function RootLayout() {
             <Stack.Screen name="info/[id]" options={{ title: '' }} />
             <Stack.Screen name="folder/[id]" options={{ title: '' }} />
           </Stack>
+          {/* Web demo only: notification banners, demo label and full-screen help (drawn on top). */}
+          {Platform.OS === 'web' ? <><DemoNotifications /><DemoChrome /></> : null}
         </ContentProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

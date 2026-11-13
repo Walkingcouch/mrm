@@ -101,7 +101,7 @@
 <body>
 <header class="top">
   <div>
-    <p class="eyebrow">Live app demo</p>
+    <p class="eyebrow">App demo · for demonstration only</p>
     <h1 id="app-name">Loading…</h1>
     <p class="tagline" id="app-tagline"></p>
   </div>
@@ -150,32 +150,28 @@
   </section>
 
   <section class="mobile" aria-labelledby="mobile-title">
-    <div class="qr-wrap"><div id="qr" role="img" aria-label="QR code that opens the app"></div><p>Scan with your phone's camera</p></div>
+    <div class="qr-wrap"><div id="qr" role="img" aria-label="QR code that opens the demo"></div><p>Scan with your phone's camera</p></div>
     <div>
-      <h2 id="mobile-title">Use it on your phone</h2>
-      <p>Open the app on your phone and add it to your Home Screen. It then opens full screen from its own icon, with no browser bars, just like an installed app.</p>
-      <a class="btn" id="open-app" href="#" target="_blank" rel="noopener">Open the app</a>
+      <h2 id="mobile-title">Try the demo on your phone</h2>
+      <p>Scan the code or tap the button to open the demo on your phone, then put it in <b>full screen</b> so it looks and feels like the real app.</p>
+      <a class="btn" id="open-app" href="#" target="_blank" rel="noopener">Open the demo</a>
       <div class="steps">
-        <div>
-          <h3>iPhone</h3>
-          <ol>
-            <li>Open the link in <b>Safari</b>.</li>
-            <li>Tap <b>Share</b> <svg class="share-icon" width="16" height="18" viewBox="0 0 16 18" aria-hidden="true"><path d="M8 1v11M4.5 4.5 8 1l3.5 3.5M3 8H2v9h12V8h-1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> at the bottom of the screen.</li>
-            <li>Scroll down and tap <b>Add to Home Screen</b>, then <b>Add</b>.</li>
-            <li>Open <b><span class="home-name">the app</span></b> from your Home Screen.</li>
-          </ol>
-        </div>
         <div>
           <h3>Android</h3>
           <ol>
-            <li>Open the link in <b>Chrome</b>.</li>
-            <li>Tap <b>⋮</b> at the top right.</li>
-            <li>Tap <b>Add to Home screen</b> (or <b>Install app</b>), then <b>Add</b> or <b>Install</b>.</li>
-            <li>Open <b><span class="home-name">the app</span></b> from your Home screen.</li>
+            <li>Open the demo in <b>Chrome</b>.</li>
+            <li>Tap <b>Go full screen</b> (or the <b>DEMO · Full screen</b> button at the bottom).</li>
+          </ol>
+        </div>
+        <div>
+          <h3>iPhone</h3>
+          <ol>
+            <li>Open the demo in <b>Safari</b>.</li>
+            <li>Tap <b>aA</b> (or <b>•••</b>) in the address bar, then <b>Hide Toolbar</b>.</li>
           </ol>
         </div>
       </div>
-      <p class="note">This is the app's own code running in your browser, connected to the live system: menus, documents and messages are real and update as they're published. While the app is open, new messages pop up as notification banners. Phone calls and some outside websites only work in the installed app from the App Store or Google Play.</p>
+      <p class="note"><b>Demo only.</b> This runs the app in your web browser to show how it looks and works; it is not the app staff install from the App Store or Google Play. Content and messages are live, and new messages pop up as banners while it's open. Phone calls, push notifications and some outside websites only work in the installed app.</p>
     </div>
   </section>
 </main>
@@ -221,7 +217,6 @@
     const appUrl = new URL(a.path, location.href).href;
     $('#open-app').href = appUrl;
     for (const l of $$('[data-full]')) l.href = `${a.path}?platform=${l.dataset.full}`;
-    for (const n of $$('.home-name')) n.textContent = a.homeName || a.name;
     const qr = $('#qr'); qr.textContent = '';
     if (window.QRCode) new QRCode(qr, { text: appUrl, width: 360, height: 360, correctLevel: QRCode.CorrectLevel.M });
     for (const b of $$('button', picker)) b.setAttribute('aria-pressed', String(b.dataset.slug === a.slug));

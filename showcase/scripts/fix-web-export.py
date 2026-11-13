@@ -7,8 +7,9 @@
    every reference to it is updated, so browsers never reuse a stale copy
    (bundles are cached for a year).
 3. Sets the browser tab title.
-4. Makes it installable as a Home Screen web app (full screen, no browser
-   bars): web manifest, icons and the iOS/Android meta tags.
+4. Adds the app icon and theme colour, and turns off pinch-zoom so the demo
+   feels like an app. (Deliberately no web manifest / "add to Home Screen":
+   the demo should be opened in the browser and put in full screen.)
 
 Usage: fix-web-export.py <export dir> <title> [<home-screen name> <icon png> <theme colour> <base path>]
 """
@@ -59,27 +60,12 @@ s = open(idx, encoding='utf-8').read()
 s = re.sub(r'<title>[^<]*</title>', f'<title>{title}</title>', s)
 
 if short and icon and base:
-    import json
     from PIL import Image
     src = Image.open(icon).convert('RGB')
     for size in (180, 192, 512):
         src.resize((size, size), Image.LANCZOS).save(os.path.join(out, f'icon-{size}.png'), optimize=True)
-    manifest = {
-        'name': title.split(' – ')[0], 'short_name': short,
-        'start_url': base + '/', 'scope': base + '/', 'display': 'standalone',
-        'orientation': 'portrait', 'background_color': '#ffffff', 'theme_color': theme or '#eeeeee',
-        'icons': [{'src': f'{base}/icon-192.png', 'sizes': '192x192', 'type': 'image/png'},
-                  {'src': f'{base}/icon-512.png', 'sizes': '512x512', 'type': 'image/png'},
-                  {'src': f'{base}/icon-512.png', 'sizes': '512x512', 'type': 'image/png', 'purpose': 'maskable'}],
-    }
-    open(os.path.join(out, 'manifest.webmanifest'), 'w').write(json.dumps(manifest, indent=2))
     head = (
-        f'<link rel="manifest" href="{base}/manifest.webmanifest">\n'
-        f'    <meta name="theme-color" content="{theme or "#eeeeee"}">\n'
-        f'    <meta name="mobile-web-app-capable" content="yes">\n'
-        f'    <meta name="apple-mobile-web-app-capable" content="yes">\n'
-        f'    <meta name="apple-mobile-web-app-status-bar-style" content="default">\n'
-        f'    <meta name="apple-mobile-web-app-title" content="{short}">\n'
+        f'<meta name="theme-color" content="{theme or "#eeeeee"}">\n'
         f'    <link rel="apple-touch-icon" href="{base}/icon-180.png">\n'
         f'    <link rel="icon" type="image/png" href="{base}/icon-192.png">\n  </head>'
     )

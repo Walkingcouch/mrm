@@ -3,7 +3,6 @@
     "slug": "mrm",
     "name": "McArthur River Mine",
     "tagline": "Site information app for employees and contractors",
-    "path": "apps/mrm/",
-    "homeName": "MRM"
+    "path": "apps/mrm/"
   }
 ]

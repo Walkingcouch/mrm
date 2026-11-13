@@ -8,10 +8,10 @@ are live, and new messages appear as notification banners on the demo phones.
 Browsers are never registered for real push.
 
 A website can't run an `.apk` or iOS build directly; that would need a paid
-cloud-emulator service. Each phone has a **Full screen** link, and the "Use it
-on your phone" section (QR code + steps) shows people how to add the app to
-their Home Screen, where it opens full screen like an installed app (the
-export adds the web manifest, icons and iOS/Android tags for this).
+cloud-emulator service. Each phone has a **Full screen** link, and the "Try the demo on your phone"
+section (QR code + steps) tells people to open the demo on their phone and put
+it in full screen. Opened on its own, the app shows a "Demo only" notice and a
+full-screen button (real full screen on Android; Hide Toolbar steps on iPhone).
 
 ## Add or update an app
 
@@ -30,7 +30,7 @@ export adds the web manifest, icons and iOS/Android tags for this).
 
    ```json
    { "slug": "<slug>", "name": "…", "tagline": "…",
-     "path": "apps/<slug>/", "homeName": "<name under the Home Screen icon>" }
+     "path": "apps/<slug>/" }
    ```
 
 3. Commit and push. Vercel redeploys the site automatically.
