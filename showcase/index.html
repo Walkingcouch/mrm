@@ -27,11 +27,24 @@
   .picker button { border: 1px solid var(--line); background: var(--surface); color: var(--text); border-radius: 999px; padding: 8px 16px; font-weight: 500; }
   .picker button[aria-pressed="true"] { background: var(--text); color: #fff; border-color: var(--text); }
 
-  main { max-width: 1200px; margin: 0 auto; padding: 8px 24px 40px; display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 32px; align-items: start; }
+  main { max-width: 1100px; margin: 0 auto; padding: 8px 24px 40px; display: flex; flex-direction: column; gap: 40px; }
   .stage { display: flex; justify-content: center; gap: 40px; flex-wrap: nowrap; padding-top: 12px; }
   .device { display: flex; flex-direction: column; align-items: center; gap: 12px; }
   .device-label { font-size: .85rem; font-weight: 600; color: var(--muted); display: flex; align-items: center; gap: 8px; }
-  .device-label button { border: 0; background: none; color: var(--accent); font-size: .85rem; padding: 2px 4px; text-decoration: underline; text-underline-offset: 2px; }
+  .device-label button, .device-label a { border: 0; background: none; color: var(--accent); font-size: .85rem; padding: 2px 4px; text-decoration: underline; text-underline-offset: 2px; font-weight: 600; }
+
+  .mobile { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 28px; display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 32px; align-items: start; }
+  .mobile h2 { font-size: 1.35rem; margin: 0 0 6px; }
+  .mobile > div > p { color: var(--muted); margin: 0 0 16px; max-width: 60ch; }
+  .qr-wrap { text-align: center; }
+  #qr { width: 200px; height: 200px; padding: 10px; background: #fff; border: 1px solid var(--line); border-radius: 12px; }
+  #qr img, #qr canvas { width: 100% !important; height: auto !important; display: block; }
+  .qr-wrap p { font-size: .85rem; color: var(--muted); margin: 8px 0 0; }
+  .steps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 20px; }
+  .steps > div { background: var(--bg); border-radius: 12px; padding: 16px 18px; }
+  .steps h3 { font-size: 1rem; margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
+  .steps ol { margin: 0; padding-left: 1.2rem; display: grid; gap: 6px; font-size: .95rem; }
+  .share-icon { display: inline-block; vertical-align: -3px; }
 
   /* Phone frames. Screen sizes in CSS px match an iPhone 15 (393×852) and a Pixel 7 (412×915); --scale fits them to the window. */
   .phone-wrap { --scale: .5; flex: 0 0 auto; width: calc((var(--w) + 2 * var(--b)) * var(--scale) * 1px); height: calc((var(--h) + 2 * var(--b)) * var(--scale) * 1px); }
@@ -58,26 +71,19 @@
   .android .navbar { flex: 0 0 24px; background: #fff; display: flex; align-items: center; justify-content: center; }
   .android .navbar::after { content: ''; width: 108px; height: 4px; border-radius: 2px; background: #333; }
 
-  aside.info { position: sticky; top: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 22px; }
-  aside.info h2 { font-size: 1.15rem; margin: 0 0 4px; }
-  aside.info p { margin: 0 0 12px; color: var(--muted); font-size: .95rem; }
-  aside.info ul { margin: 0 0 16px; padding: 0; list-style: none; display: grid; gap: 8px; font-size: .95rem; }
-  aside.info li { display: flex; gap: 10px; align-items: flex-start; }
-  aside.info li::before { content: ''; flex: 0 0 18px; height: 18px; margin-top: 3px; border-radius: 50%;
-    background: var(--accent-soft) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='%2300807a' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center / 12px no-repeat; }
   .actions { display: grid; gap: 8px; }
   .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 16px; border-radius: 10px;
     border: 1px solid var(--accent); background: var(--accent); color: #fff; text-decoration: none; font-weight: 600; }
   .btn.secondary { background: var(--surface); color: var(--accent); }
-  .note { font-size: .8rem; color: var(--muted); margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
+  .note { font-size: .85rem; color: var(--muted); margin: 16px 0 0; }
 
   .switch { display: none; }
   footer { max-width: 1200px; margin: 0 auto; padding: 0 24px 32px; color: var(--muted); font-size: .8rem; }
 
   /* Narrow windows: one phone at a time, with an iPhone / Android switch. */
   @media (max-width: 980px) {
-    main { grid-template-columns: minmax(0, 1fr); }
-    aside.info { position: static; }
+    .mobile { grid-template-columns: minmax(0, 1fr); padding: 20px; }
+    .steps { grid-template-columns: minmax(0, 1fr); }
     .switch { display: inline-flex; margin: 0 auto 8px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); padding: 3px; }
     .switch button { border: 0; background: none; padding: 6px 18px; border-radius: 999px; font-weight: 600; color: var(--muted); }
     .switch button[aria-pressed="true"] { background: var(--text); color: #fff; }
@@ -86,6 +92,10 @@
     .center { text-align: center; }
   }
   @media (max-width: 600px) { header.top { padding-top: 20px; } }
+  /* On a phone the QR code isn't useful (you're already on the phone), and the
+     "use it on your phone" card comes first. */
+  html.on-phone .qr-wrap { display: none; }
+  html.on-phone .mobile { order: -1; }
 </style>
 </head>
 <body>
@@ -118,7 +128,7 @@
             <div class="home" aria-hidden="true"></div>
           </div>
         </div></div>
-        <div class="device-label">iPhone <button type="button" data-reset="ios">Restart</button></div>
+        <div class="device-label">iPhone <button type="button" data-reset="ios">Restart</button><a data-full="ios" href="#" target="_blank" rel="noopener">Full screen</a></div>
       </div>
 
       <div class="device android">
@@ -134,26 +144,50 @@
             <div class="navbar" aria-hidden="true"></div>
           </div>
         </div></div>
-        <div class="device-label">Android <button type="button" data-reset="android">Restart</button></div>
+        <div class="device-label">Android <button type="button" data-reset="android">Restart</button><a data-full="android" href="#" target="_blank" rel="noopener">Full screen</a></div>
       </div>
     </div>
   </section>
 
-  <aside class="info" aria-label="About this app">
-    <h2>About the app</h2>
-    <p id="app-desc"></p>
-    <ul id="app-features"></ul>
-    <div class="actions">
-      <a class="btn" id="open-full" href="#" target="_blank" rel="noopener">Open full screen</a>
-      <a class="btn secondary" id="apk" href="#" hidden>Download Android test app (.apk)</a>
+  <section class="mobile" aria-labelledby="mobile-title">
+    <div class="qr-wrap"><div id="qr" role="img" aria-label="QR code that opens the app"></div><p>Scan with your phone's camera</p></div>
+    <div>
+      <h2 id="mobile-title">Use it on your phone</h2>
+      <p>Open the app on your phone and add it to your Home Screen. It then opens full screen from its own icon, with no browser bars, just like an installed app.</p>
+      <a class="btn" id="open-app" href="#" target="_blank" rel="noopener">Open the app</a>
+      <div class="steps">
+        <div>
+          <h3>iPhone</h3>
+          <ol>
+            <li>Open the link in <b>Safari</b>.</li>
+            <li>Tap <b>Share</b> <svg class="share-icon" width="16" height="18" viewBox="0 0 16 18" aria-hidden="true"><path d="M8 1v11M4.5 4.5 8 1l3.5 3.5M3 8H2v9h12V8h-1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg> at the bottom of the screen.</li>
+            <li>Scroll down and tap <b>Add to Home Screen</b>, then <b>Add</b>.</li>
+            <li>Open <b><span class="home-name">the app</span></b> from your Home Screen.</li>
+          </ol>
+        </div>
+        <div>
+          <h3>Android</h3>
+          <ol>
+            <li>Open the link in <b>Chrome</b>.</li>
+            <li>Tap <b>⋮</b> at the top right.</li>
+            <li>Tap <b>Add to Home screen</b> (or <b>Install app</b>), then <b>Add</b> or <b>Install</b>.</li>
+            <li>Open <b><span class="home-name">the app</span></b> from your Home screen.</li>
+          </ol>
+        </div>
+      </div>
+      <p class="note">This is the app's own code running in your browser, connected to the live system: menus, documents and messages are real and update as they're published. While the app is open, new messages pop up as notification banners. Phone calls and some outside websites only work in the installed app from the App Store or Google Play.</p>
     </div>
-    <p class="note">This is the app's own code running in your browser, connected to the live system: menus, documents and messages are real and update as they're published. New messages pop up as notifications on both phones. Phone calls and some third-party websites only work in the installed app.</p>
-  </aside>
+  </section>
 </main>
-<footer>Demo for evaluation only. Sample content may not be current.</footer>
+<footer>Demo for evaluation only.</footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 (async function () {
+  // Visitors already on a phone: no QR code, and the "use it on your phone" card first.
+  if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || (matchMedia('(pointer: coarse)').matches && innerWidth < 820)) {
+    document.documentElement.classList.add('on-phone');
+  }
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
   let apps = [];
@@ -184,12 +218,12 @@
     document.title = `${a.name} – App Demo`;
     $('#app-name').textContent = a.name;
     $('#app-tagline').textContent = a.tagline || '';
-    $('#app-desc').textContent = a.description || '';
-    const ul = $('#app-features'); ul.textContent = '';
-    for (const f of a.features || []) { const li = document.createElement('li'); li.textContent = f; ul.appendChild(li); }
-    $('#open-full').href = a.path;
-    const apk = $('#apk');
-    if (a.apk) { apk.href = a.apk; apk.hidden = false; } else { apk.hidden = true; }
+    const appUrl = new URL(a.path, location.href).href;
+    $('#open-app').href = appUrl;
+    for (const l of $$('[data-full]')) l.href = `${a.path}?platform=${l.dataset.full}`;
+    for (const n of $$('.home-name')) n.textContent = a.homeName || a.name;
+    const qr = $('#qr'); qr.textContent = '';
+    if (window.QRCode) new QRCode(qr, { text: appUrl, width: 360, height: 360, correctLevel: QRCode.CorrectLevel.M });
     for (const b of $$('button', picker)) b.setAttribute('aria-pressed', String(b.dataset.slug === a.slug));
     const u = new URL(location.href); u.searchParams.set('app', a.slug); history.replaceState(null, '', u);
     load('ios'); load('android');
@@ -214,7 +248,7 @@
       const w = +cs.getPropertyValue('--w') + 2 * +cs.getPropertyValue('--b');
       const h = +cs.getPropertyValue('--h') + 2 * +cs.getPropertyValue('--b');
       const vw = document.documentElement.clientWidth;
-      const availW = narrow ? Math.min(vw - 32, 460) : (Math.min(vw, 1200) - 300 - 48 - 32 - 40) / 2;
+      const availW = narrow ? Math.min(vw - 32, 460) : (Math.min(vw, 1100) - 48 - 40) / 2;
       const s = Math.min(1, availH / h, availW / w);
       p.style.setProperty('--scale', s.toFixed(3));
       p.parentElement.style.setProperty('--scale', s.toFixed(3));

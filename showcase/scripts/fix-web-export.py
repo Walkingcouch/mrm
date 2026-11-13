@@ -7,12 +7,15 @@
    every reference to it is updated, so browsers never reuse a stale copy
    (bundles are cached for a year).
 3. Sets the browser tab title.
+4. Makes it installable as a Home Screen web app (full screen, no browser
+   bars): web manifest, icons and the iOS/Android meta tags.
 
-Usage: fix-web-export.py <export dir> <title>
+Usage: fix-web-export.py <export dir> <title> [<home-screen name> <icon png> <theme colour> <base path>]
 """
 import hashlib, os, re, shutil, sys
 
 out, title = sys.argv[1], sys.argv[2]
+short, icon, theme, base = (sys.argv[3:7] + [None] * 4)[:4]
 assets = os.path.join(out, 'assets')
 if os.path.isdir(os.path.join(assets, 'node_modules')):
     shutil.move(os.path.join(assets, 'node_modules'), os.path.join(assets, 'nm'))
@@ -37,8 +40,8 @@ while changed:
         if not os.path.exists(p):
             continue  # already renamed earlier in this pass
         digest = hashlib.md5(open(p, 'rb').read()).hexdigest()[:12]
-        base = re.sub(r'-[0-9a-f]{12,32}\.js$', '', old)
-        new = f'{base}-{digest}.js'
+        stem = re.sub(r'-[0-9a-f]{12,32}\.js$', '', old)
+        new = f'{stem}-{digest}.js'
         if new == old:
             continue
         os.rename(p, os.path.join(js_dir, new))
@@ -53,5 +56,36 @@ while changed:
 
 idx = os.path.join(out, 'index.html')
 s = open(idx, encoding='utf-8').read()
-open(idx, 'w', encoding='utf-8').write(re.sub(r'<title>[^<]*</title>', f'<title>{title}</title>', s))
+s = re.sub(r'<title>[^<]*</title>', f'<title>{title}</title>', s)
+
+if short and icon and base:
+    import json
+    from PIL import Image
+    src = Image.open(icon).convert('RGB')
+    for size in (180, 192, 512):
+        src.resize((size, size), Image.LANCZOS).save(os.path.join(out, f'icon-{size}.png'), optimize=True)
+    manifest = {
+        'name': title.split(' – ')[0], 'short_name': short,
+        'start_url': base + '/', 'scope': base + '/', 'display': 'standalone',
+        'orientation': 'portrait', 'background_color': '#ffffff', 'theme_color': theme or '#eeeeee',
+        'icons': [{'src': f'{base}/icon-192.png', 'sizes': '192x192', 'type': 'image/png'},
+                  {'src': f'{base}/icon-512.png', 'sizes': '512x512', 'type': 'image/png'},
+                  {'src': f'{base}/icon-512.png', 'sizes': '512x512', 'type': 'image/png', 'purpose': 'maskable'}],
+    }
+    open(os.path.join(out, 'manifest.webmanifest'), 'w').write(json.dumps(manifest, indent=2))
+    head = (
+        f'<link rel="manifest" href="{base}/manifest.webmanifest">\n'
+        f'    <meta name="theme-color" content="{theme or "#eeeeee"}">\n'
+        f'    <meta name="mobile-web-app-capable" content="yes">\n'
+        f'    <meta name="apple-mobile-web-app-capable" content="yes">\n'
+        f'    <meta name="apple-mobile-web-app-status-bar-style" content="default">\n'
+        f'    <meta name="apple-mobile-web-app-title" content="{short}">\n'
+        f'    <link rel="apple-touch-icon" href="{base}/icon-180.png">\n'
+        f'    <link rel="icon" type="image/png" href="{base}/icon-192.png">\n  </head>'
+    )
+    s = s.replace('</head>', head, 1)
+    # Stop pinch-zoom and double-tap zoom so it feels like an app.
+    s = s.replace('content="width=device-width, initial-scale=1, shrink-to-fit=no"',
+                  'content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"')
+open(idx, 'w', encoding='utf-8').write(s)
 print('post-processed', out)

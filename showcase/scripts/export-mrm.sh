@@ -16,5 +16,5 @@ else
 fi
 rm -rf ../showcase/apps/mrm
 WEB_BASE_URL=/apps/mrm npx expo export -p web --output-dir ../showcase/apps/mrm
-python3 ../showcase/scripts/fix-web-export.py ../showcase/apps/mrm "McArthur River Mine – App Demo"
+python3 ../showcase/scripts/fix-web-export.py ../showcase/apps/mrm "McArthur River Mine – App Demo" "MRM" assets/icon.png "#eeeeee" /apps/mrm
 echo "Exported to showcase/apps/mrm"

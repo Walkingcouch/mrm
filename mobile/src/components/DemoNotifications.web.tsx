@@ -12,8 +12,17 @@ import { fonts } from '@/lib/theme';
 
 const APP_NAME = 'McArthur River Mine';
 const VISIBLE_MS = 7000;
-const os: 'ios' | 'android' =
-  typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('platform') === 'android' ? 'android' : 'ios';
+// ?platform= from the demo page; otherwise (full screen on a real phone) the device itself.
+const os: 'ios' | 'android' = (() => {
+  if (typeof window === 'undefined') return 'ios';
+  const p = new URLSearchParams(window.location.search).get('platform');
+  if (p === 'ios' || p === 'android') {
+    try { sessionStorage.setItem('demo-platform', p); } catch { /* ignore */ }
+    return p;
+  }
+  try { const saved = sessionStorage.getItem('demo-platform'); if (saved === 'ios' || saved === 'android') return saved; } catch { /* ignore */ }
+  return /android/i.test(navigator.userAgent) ? 'android' : 'ios';
+})();
 
 function wording(m: MessageRow) {
   if (m.scope === 'global_emergency') {
