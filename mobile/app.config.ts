@@ -1,4 +1,13 @@
 import type { ExpoConfig } from 'expo/config';
+// app.config runs in Node; typed locally so the app's tsconfig needs no Node types.
+declare const require: (m: 'fs') => { existsSync(path: string): boolean };
+const { existsSync } = require('fs');
+
+// Firebase config for Android push (FCM). Either an EAS "file" environment
+// variable called GOOGLE_SERVICES_JSON, or mobile/google-services.json
+// (downloaded from the Firebase console; not a secret, see docs/PUSH.md).
+const googleServicesFile = process.env.GOOGLE_SERVICES_JSON
+  ?? (existsSync('./google-services.json') ? './google-services.json' : undefined);
 
 // Store identifiers are NOT invented here. They must come from the owner's
 // verified Apple / Google accounts (see docs/RELEASE.md):
@@ -33,6 +42,7 @@ const config: ExpoConfig = {
     infoPlist: { ITSAppUsesNonExemptEncryption: false },
   },
   android: {
+    ...(googleServicesFile ? { googleServicesFile } : {}),
     // Preview/test builds use a clearly non-store id so they install alongside the live app.
     package: required('ANDROID_PACKAGE', APP_ENV === 'preview' ? 'dev.local.mrm.preview' : 'dev.local.mrm'),
     adaptiveIcon: {
