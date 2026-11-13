@@ -5,6 +5,14 @@ cd "$(dirname "$0")/../../mobile"
 unset EXPO_PUBLIC_SUPABASE_URL EXPO_PUBLIC_SUPABASE_ANON_KEY EXPO_PUBLIC_PDF_VIEWER_URL
 rm -rf ../showcase/apps/mrm
 WEB_BASE_URL=/apps/mrm npx expo export -p web --output-dir ../showcase/apps/mrm
+# Git and Vercel skip any folder called node_modules, which is where the export
+# puts icon fonts and navigation images. Move them and update the references.
+OUT=../showcase/apps/mrm
+if [ -d "$OUT/assets/node_modules" ]; then
+  mv "$OUT/assets/node_modules" "$OUT/assets/nm"
+  grep -rl 'assets/node_modules/' "$OUT/_expo" | xargs sed -i.bak 's#assets/node_modules/#assets/nm/#g'
+  find "$OUT" -name '*.bak' -delete
+fi
 # Browser tab title for the full-screen demo.
 sed -i.bak 's|<title>[^<]*</title>|<title>McArthur River Mine – App Demo</title>|' ../showcase/apps/mrm/index.html && rm -f ../showcase/apps/mrm/index.html.bak
 echo "Exported to showcase/apps/mrm"
