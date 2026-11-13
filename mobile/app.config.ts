@@ -48,7 +48,9 @@ const config: ExpoConfig = {
     'expo-router',
     ['expo-notifications', { color: '#00807A', defaultChannel: 'messages' }],
   ],
-  experiments: { typedRoutes: false },
+  // WEB_BASE_URL is only used for the web build that runs on the demo/showcase
+  // site (e.g. /apps/mrm); the phone builds ignore it.
+  experiments: { typedRoutes: false, ...(process.env.WEB_BASE_URL ? { baseUrl: process.env.WEB_BASE_URL } : {}) },
   extra: {
     appEnv: APP_ENV,
     supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,

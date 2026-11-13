@@ -1,0 +1,13 @@
+{
+  "cleanUrls": false,
+  "rewrites": [
+    { "source": "/apps/:slug/:path*", "destination": "/apps/:slug/index.html" }
+  ],
+  "headers": [
+    { "source": "/apps/:slug/_expo/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }] },
+    { "source": "/(.*)", "headers": [
+      { "key": "X-Content-Type-Options", "value": "nosniff" },
+      { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+    ] }
+  ]
+}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, FlatList, Linking, RefreshControl } from 'react-native';
+import { Alert, FlatList, Linking, Platform, RefreshControl } from 'react-native';
 import { router } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { entriesFor, type ContentSnapshot, type Entry, type Section } from '@/lib/api';
@@ -28,6 +28,8 @@ export function openEntry(e: Entry) {
       return router.push({ pathname: '/info/[id]', params: { id: e.id } });
     case 'phone':
       if (!e.phone) return notYet();
+      // Web demo: a browser can't place the call, so say what the app does.
+      if (Platform.OS === 'web') return void window.alert(`In the app, this calls ${e.label}: ${e.phone}`);
       return Linking.openURL(`tel:${e.phone.replace(/[^\d+]/g, '')}`).catch(() => notYet());
     case 'map':
       if (!e.url) return notYet();

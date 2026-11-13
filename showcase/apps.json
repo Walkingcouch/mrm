@@ -1,0 +1,11 @@
+[
+  {
+    "slug": "mrm",
+    "name": "McArthur River Mine",
+    "tagline": "Site information app for employees and contractors",
+    "description": "Flight and bus timetables, village menus, HR and payroll documents, weather, emergency messages and contacts, all managed from a simple admin website.",
+    "features": ["Push notifications and emergency alerts", "Documents that work offline", "Updated from a web admin, no app release needed"],
+    "path": "apps/mrm/",
+    "apk": null
+  }
+]
